@@ -16,7 +16,6 @@
 - Laoseis ja tooted
 - Kasutaja sisselogimisandmed (kasutajanimed, paroolide hashid)  
 - Tellimused
-- Ostude ajalugu
 
 ### Rühmaliikmed
 Georg Järvis
