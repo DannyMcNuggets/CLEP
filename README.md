@@ -10,8 +10,13 @@
 -   Pood kogub toodete vaatamise kohta statistikat ja näitab, mis tooteid kõige rohkem vaadatakse / tellitakse.
 
 ## Framework
-- SQLite and JDBC
-- JavaMail API (?)
+**JavaMail API**
+
+**SQLite ja JDBC**:   
+- Laoseis ja tooted
+- Kasutaja sisselogimisandmed (kasutajanimed, paroolide hashid)  
+- Tellimused
+- Ostude ajalugu
 
 ### Rühmaliikmed
 Georg Järvis
