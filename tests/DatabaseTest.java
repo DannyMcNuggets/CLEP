@@ -1,4 +1,7 @@
 import org.junit.jupiter.api.Assertions;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,42 +18,52 @@ import java.sql.Statement;
 public class DatabaseTest {
 
     private static final String TEST_DB_PATH ="test_database.db";
+    private static final File dbFile = new File(TEST_DB_PATH);
     private static final String scriptSQL = "dbscript.sql";
-    private static Connection connection;
 
-    @BeforeAll
+    @BeforeClass
     static void setUp() throws SQLException, IOException {
-        File dbFile = new File(TEST_DB_PATH);
 
-        if (dbFile.exists()) {
-            dbFile.delete();
+        if (dbFile.exists()) { dbFile.delete();}
+        
+        boolean created = dbFile.createNewFile();
+        if (created){
+            System.out.println("Database created with file: " + dbFile.getAbsolutePath());
+        } else {
+            System.out.println("Failed to created DB.");
         }
-
-        connection = DriverManager.getConnection("jdbc:sqlite:" + TEST_DB_PATH);
-
-        Statement statement = connection.createStatement();
-        String script = Files.readString(Path.of(scriptSQL));
-        statement.execute(script);
-        System.out.println("Script executed successfully");
     }
 
     @Test
-    public void dbExists() {
-        File dbFile = new File(TEST_DB_PATH);
-        Assertions.assertTrue(dbFile.exists());
-    }
-
-    @Test
-    public void firstTest() {
+    public void assertTrueTest() {
         Assertions.assertTrue(true);
     }
 
-    @AfterAll
-    public static void tearDown() throws SQLException {
-        connection.close();
-        File dbFile = new File(TEST_DB_PATH);
-        if (dbFile.exists()) {
-            dbFile.delete();
+    @Test
+    public void dbFileExists() {
+        assert dbFile.exists();
+    }
+
+    @Test
+    public void establishConnection() throws SQLException {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + TEST_DB_PATH)) {
+            Assert.assertTrue(connection.isValid(3));
         }
     }
+
+    @Test
+    public void establishConnectionInvalidPath() {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:/invalid/path/to/database.db")) {
+            Assert.fail("Expected SQLException to be thrown, but connection was established.");
+        } catch (SQLException e) {
+            Assert.assertTrue(true);
+        }
+    }
+
+    @AfterClass
+    static void tearDown() throws SQLException {
+        System.out.println("we are in afterclass");
+        dbFile.delete();
+    }
+
 }
