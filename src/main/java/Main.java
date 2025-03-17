@@ -9,7 +9,7 @@ public class Main {
         connection = DriverManager.getConnection("jdbc:sqlite:database.db");
         Statement statement = connection.createStatement();
         String script = "INSERT INTO orders (user_id, order_date) VALUES (17, CURRENT_TIMESTAMP);";
-        statement.executeUpdate(script);
+        //statement.executeUpdate(script);
         ResultSet resultSet = statement.executeQuery("SELECT * FROM orders");
         while (resultSet.next()) {
             int userId = resultSet.getInt("user_id");
