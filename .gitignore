@@ -1,4 +1,15 @@
+# Maven or InteliJ
+target/
 out/
-CLEP.iml
-.DS_Store
+*.iml
 .idea/
+.project
+.classpath
+.settings/
+.idea/
+
+# mac?
+.DS_Store
+
+# Compiled class files
+*.class
