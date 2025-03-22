@@ -1,7 +1,6 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +15,20 @@ public class Main {
 
         for (String line : getSELECTasSTRING(getOrdersList)){ // just an example
             System.out.println(line);
+        }
+
+        List<String> queryResult = getSELECTasSTRING(getOrdersList);
+
+        try (ServerSocket ss = new ServerSocket(8080)) {
+            while (true) {
+                try (Socket socket = ss.accept()) {
+                    DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+                    output.writeInt(queryResult.size());
+                    for (int i = 0; i < queryResult.size(); i++) {
+                        output.writeUTF(queryResult.get(i));
+                    }
+                }
+            }
         }
     }
 
