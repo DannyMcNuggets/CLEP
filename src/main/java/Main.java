@@ -17,9 +17,7 @@ public class Main {
             System.out.println(line);
         }
 
-        int portNumber = 8080;
-        try (ServerSocket ss = new ServerSocket(portNumber)) {
-            // wait for an incoming connection
+        try (ServerSocket ss = new ServerSocket(8080)) {
             while (true) {
                 try (Socket socket = ss.accept()) {
                     ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
