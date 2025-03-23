@@ -8,14 +8,10 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.HexFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Helpers {
-
-    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        String password = "qwerty321";
-        byte [] salt = generateSalt();
-        byte [] hashed = generateHash(salt, password);
-    }
 
     public static byte [] generateSalt(){
         SecureRandom random = new SecureRandom();
@@ -36,6 +32,13 @@ public class Helpers {
 
     public static boolean emailValidate(String EmailAddress){
         return EmailValidator.getInstance().isValid(EmailAddress);
+    }
+
+    public static boolean passwordValid(String password){
+        String re = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,30}$";
+        Pattern pattern = Pattern.compile(re);
+        Matcher matcher = pattern.matcher(password);
+        return matcher.matches();
     }
 
 }
