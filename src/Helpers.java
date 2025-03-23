@@ -2,7 +2,6 @@ import org.apache.commons.validator.routines.EmailValidator;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -40,5 +39,7 @@ public class Helpers {
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
     }
+
+    // TODO: validate if entered password is equal to SALT+PASSWORD = HASH from DB
 
 }
