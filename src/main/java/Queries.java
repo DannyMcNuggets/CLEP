@@ -38,9 +38,9 @@ public class Queries {
         String query = "INSERT INTO user_credentials (user_id, password_hash, salt) VALUES (?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setInt(1, id);              // Set the user_id
-            pstmt.setBytes(2, hash);      // Set the password_hash (as raw bytes)
-            pstmt.setBytes(3, salt);              // Set the salt (as raw bytes)
+            pstmt.setInt(1, id);
+            pstmt.setBytes(2, hash);
+            pstmt.setBytes(3, salt);
 
             int rowsAffected =  pstmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -67,6 +67,19 @@ public class Queries {
         }
 
         return false;
+    }
+
+    public static ResultSet getSaltandHash(Connection connection, int id){
+
+        String query = "SELECT salt, password_hash FROM user_credentials WHERE user_id = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)){
+            pstmt.setInt(1, id);
+            return pstmt.executeQuery();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static boolean checkIfNameFree(Connection connection, String name) throws SQLException {

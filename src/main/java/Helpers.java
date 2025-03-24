@@ -6,7 +6,9 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,7 +43,28 @@ public class Helpers {
         return matcher.matches();
     }
 
-    // TODO: validate if entered password is equal to SALT+PASSWORD = HASH from DB
+    // NOT TESTED YET!
+    public static boolean verifyPassword(Connection connection, String name, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+
+        int userID = Queries.getUserID(connection, name);
+        if (userID == -1){
+            System.out.println("could not find user with such name");
+            return false;
+        }
+
+        try (ResultSet rs = Queries.getSaltandHash(connection, userID)){
+            if (!rs.next()){
+                System.out.println("no salt and/or hash found for user");
+                return false;
+            }
+
+            byte [] salt = rs.getBytes("salt");
+            byte [] storedHash = rs.getBytes("password_hash");
+
+            byte [] generateHash = generateHash(salt, password);
+            return Arrays.equals(generateHash, storedHash);
+        }
+    }
 
     public static boolean registerCustomer(Connection connection, String name, String password, String email) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         if(!Queries.checkIfNameFree(connection, name)){
