@@ -1,11 +1,6 @@
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class Queries {
-
-    private static final String selectAllFromOrders = "SELECT * FROM orders";
 
     // TODO: get user_id where username == provided name
     /*
@@ -27,7 +22,7 @@ public class Queries {
      */
 
     // SELECT
-    private static ResultSet executeQuery(Connection connection, String query) throws SQLException {
+    public static ResultSet executeQuery(Connection connection, String query) throws SQLException {
        Statement st = connection.createStatement();
        return st.executeQuery(query);
     }
@@ -36,6 +31,70 @@ public class Queries {
     public static int executeInsertOrUpdate(Connection connection, String query) throws SQLException {
         Statement st = connection.createStatement();
         return st.executeUpdate(query);
+    }
+
+    public static boolean insertSaltAndHash(Connection connection, int id, byte [] salt, byte [] hash) throws SQLException {
+
+        String query = "INSERT INTO user_credentials (user_id, password_hash, salt) VALUES (?, ?, ?)";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, id);              // Set the user_id
+            pstmt.setBytes(2, hash);      // Set the password_hash (as raw bytes)
+            pstmt.setBytes(3, salt);              // Set the salt (as raw bytes)
+
+            int rowsAffected =  pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean insertUser(Connection connection, String name, String email) throws SQLException{
+
+        String query =  "INSERT INTO users (username, email, role) VALUES (?, ?, 'customer');";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, name);
+            pstmt.setString(2, email);
+
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean checkIfNameFree(Connection connection, String name) throws SQLException {
+        String query = "SELECT 1 FROM users WHERE username = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, name);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return !rs.next(); // return false if name already exists
+            }
+        }
+    }
+
+    public static int getUserID(Connection connection, String name) {
+
+        String query = "SELECT id FROM users WHERE username = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, name);  // Set the username parameter
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                } else {
+                    return -1;
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // TODO
