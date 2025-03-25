@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 public class Helpers {
 
+
     public static byte [] generateSalt(){
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
@@ -22,19 +23,23 @@ public class Helpers {
         return salt;
     }
 
+
     public static byte [] generateHash(byte [] salt, String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         return factory.generateSecret(spec).getEncoded();
     }
 
+
     public static String byteToString(byte [] array){
         return HexFormat.of().formatHex(array);
     }
 
+
     public static boolean emailValidate(String EmailAddress){
         return EmailValidator.getInstance().isValid(EmailAddress);
     }
+
 
     public static boolean passwordValid(String password){
         String re = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,30}$";
@@ -43,15 +48,23 @@ public class Helpers {
         return matcher.matches();
     }
 
-    // NOT TESTED YET!
-    public static boolean verifyPassword(Connection connection, String name, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
+    public static String login(Connection connection, String name, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+        // check if userID exists and retrieve it
         int userID = Queries.getUserID(connection, name);
-        if (userID == -1){
-            System.out.println("could not find user with such name");
-            return false;
-        }
+        if (userID == -1 ) return null;
 
+        // verify password
+        if (verifyPassword(connection, userID, password)){
+            // give role
+            return Queries.getUserRole(connection, userID);
+        } else {
+            return null;
+        }
+    }
+
+
+    public static boolean verifyPassword(Connection connection, int userID, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         try (ResultSet rs = Queries.getSaltandHash(connection, userID)){
             if (!rs.next()){
                 System.out.println("no salt and/or hash found for user");
@@ -60,11 +73,11 @@ public class Helpers {
 
             byte [] salt = rs.getBytes("salt");
             byte [] storedHash = rs.getBytes("password_hash");
-
             byte [] generateHash = generateHash(salt, password);
             return Arrays.equals(generateHash, storedHash);
         }
     }
+
 
     public static boolean registerCustomer(Connection connection, String name, String password, String email) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         if(!Queries.checkIfNameFree(connection, name)){
@@ -82,7 +95,7 @@ public class Helpers {
             return false;
         }
 
-        if(!Queries.insertUser(connection, name, email)){
+        if(!Queries.insertCustomer(connection, name, email)){
             return false;
         }
 
@@ -101,7 +114,12 @@ public class Helpers {
         }
 
         return true;
+    }
 
+
+    // mb... not sure
+    private static String resultSetToJson(ResultSet resultSet) {
+        return null;
     }
 
 }
