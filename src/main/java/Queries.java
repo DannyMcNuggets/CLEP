@@ -76,4 +76,11 @@ public class Queries {
     }
 
 
+    public static ResultSet getAllOrders(Connection connection) throws SQLException {
+        String query = "SELECT * FROM orders";
+        Statement st = connection.createStatement();
+        return st.executeQuery(query);
+    }
+
+
 }
