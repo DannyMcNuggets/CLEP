@@ -29,7 +29,7 @@ public class Queries {
 
     public static ResultSet getSaltandHash(Connection connection, int id) {
         String query = "SELECT salt, password_hash FROM user_credentials WHERE user_id = ?";
-        try { // tws breaks the thing for some reason
+        try { // twr breaks the thing for some reason
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setInt(1, id);
             return pstmt.executeQuery();
