@@ -47,9 +47,9 @@ public class Queries {
     }
 
 
-    public static boolean checkIfNameFree(Connection connection, String name) throws SQLException {
+    public static boolean checkIfNameTaken(Connection connection, String name) throws SQLException {
         String query = "SELECT 1 FROM users WHERE username = ?";
-        return !executeQuery(connection, query,name).next();
+        return executeQuery(connection, query,name).next();
     }
 
 

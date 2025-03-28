@@ -80,7 +80,7 @@ public class Helpers {
 
 
     public static boolean registerCustomer(Connection connection, String name, String password, String email) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
-        if(!Queries.checkIfNameFree(connection, name)){
+        if(Queries.checkIfNameTaken(connection, name)){
             System.out.println("name is taken");
             return false;
         }
