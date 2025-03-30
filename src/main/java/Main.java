@@ -12,10 +12,7 @@ public class Main {
 
         try (ServerSocket ss = new ServerSocket(8080)) {
             while (true) {
-                try (Socket socket = ss.accept()) {
-                    ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                    output.writeObject(new Packet(Queries.getAllOrders(connection))); // basic query for testing
-                }
+                new Thread(new ConnectionHandler(ss.accept(), connection)).start();
             }
         }
     }
