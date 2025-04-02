@@ -35,9 +35,9 @@ public class Queries {
     }
 
 
-    public static boolean insertCustomer(Connection connection, String name, String email) throws SQLException{
-        String query =  "INSERT INTO users (username, email, role) VALUES (?, ?, 'customer');";
-        return executeUpdate(connection, query, name, email);
+    public static boolean insertUser(Connection connection, String name, String email, String role) throws SQLException{
+        String query =  "INSERT INTO users (username, email, role) VALUES (?, ?, ?);";
+        return executeUpdate(connection, query, name, email, role);
     }
 
 
