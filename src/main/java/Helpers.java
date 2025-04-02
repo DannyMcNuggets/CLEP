@@ -71,6 +71,8 @@ public class Helpers {
                 return false;
             }
 
+            System.out.println("salt and hash found");
+
             byte [] salt = rs.getBytes("salt");
             byte [] storedHash = rs.getBytes("password_hash");
             byte [] generateHash = generateHash(salt, password);
@@ -79,7 +81,7 @@ public class Helpers {
     }
 
 
-    public static boolean registerCustomer(Connection connection, String name, String password, String email) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public static boolean registerUser(Connection connection, String name, String password, String email, String role) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         if(Queries.checkIfNameTaken(connection, name)){
             System.out.println("name is taken");
             return false;
@@ -95,7 +97,7 @@ public class Helpers {
             return false;
         }
 
-        if(!Queries.insertCustomer(connection, name, email)){
+        if(!Queries.insertUser(connection, name, email, role)){
             return false;
         }
 
@@ -107,8 +109,10 @@ public class Helpers {
 
         byte [] salt = Helpers.generateSalt();
         byte [] passwordHash = Helpers.generateHash(salt, password);
+        System.out.println("Generated salt on registry: " + Helpers.byteToString(salt));
+        System.out.println("Generated hash on registry: " + Helpers.byteToString(passwordHash));
 
-        if(!Queries.insertSaltAndHash(connection, userID, salt, passwordHash)){
+        if(!Queries.insertSaltAndHash(connection, userID, passwordHash, salt)){
             System.out.println("could not insert credentials");
             return false;
         }

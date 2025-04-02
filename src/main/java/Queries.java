@@ -29,7 +29,7 @@ public class Queries {
     }
 
 
-    public static boolean insertSaltAndHash(Connection connection, int id,byte [] hash,  byte [] salt) throws SQLException {
+    public static boolean insertSaltAndHash(Connection connection, int id, byte [] hash, byte [] salt) throws SQLException {
         String query = "INSERT INTO user_credentials (user_id, password_hash, salt) VALUES (?, ?, ?)";
         return executeUpdate(connection, query, id, hash, salt);
     }

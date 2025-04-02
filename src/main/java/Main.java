@@ -12,6 +12,10 @@ public class Main {
     public static void main(String[] args) throws SQLException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         connection = initiateConnection(DB_PATH);
 
+        /*
+        Helpers.registerUser(connection, "MainAdmin3", "Qwerty321", "mainadmin@clep.com", "admin");
+        */
+
         try (ServerSocket ss = new ServerSocket(8080)) {
             while (true) {
                 try (Socket socket = ss.accept()) {
@@ -20,6 +24,8 @@ public class Main {
                 }
             }
         }
+
+
     }
 
     public static Connection initiateConnection(String pathname) throws SQLException {
@@ -42,6 +48,7 @@ public class Main {
             System.out.println("Received login: " + username + " / " + password);
 
             int userID = Queries.getUserID(connection, username);
+            System.out.println("userid is: " + userID);
             if (userID == -1) {
                 System.out.println("user id is: " + userID);
                 output.writeUTF("Invalid"); // REPLACE WITH PROTOCOL CODES LATER
@@ -49,13 +56,15 @@ public class Main {
                 return null;}
 
             String role;
-
+            System.out.println("we got riiiight here");
             if (Helpers.verifyPassword(connection, userID, password)){
                 output.writeUTF("login good");
                 role = Queries.getUserRole(connection, userID);
+                System.out.println("the role is: " + role);
                 return switch (role) {
                     case "customer" -> new Customer(userID, connection);
-                    //case "admin" -> new Admin(userID, connection);  more roles later
+                    case "admin" -> new Admin(userID, connection);
+                    case "employee" -> new Employee(userID, connection);
                     default -> null;
                 };
             }
