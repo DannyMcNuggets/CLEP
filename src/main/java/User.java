@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 public abstract class User {
     private int userID;
-    private Connection connection;
+    protected Connection connection;
 
     public User(int userID, Connection connection){
         this.userID = userID;
