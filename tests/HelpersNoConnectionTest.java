@@ -54,5 +54,14 @@ public class HelpersNoConnectionTest {
         assertFalse(Helpers.passwordValid("12345678"));
     }
 
+    @Test
+    void productTypeEan(){
+        assertEquals("ean", Helpers.productType("56902716"));
+    }
+
+    @Test
+    void productTypeText(){
+        assertEquals("name", Helpers.productType("Product Name"));
+    }
 
 }
