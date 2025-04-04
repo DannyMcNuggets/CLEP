@@ -13,8 +13,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static org.testng.AssertJUnit.assertFalse;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.*;
 
 public class HelpersConnectionTest {
 
@@ -49,9 +48,38 @@ public class HelpersConnectionTest {
     }
 
 
+    @Test
+    public void registerUserNameTakenFail() throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String registerName = "NewUser12";
+        String registerPassword = "ValidPass123";
+        String registerEmail = "validemail@mail.com";
+        String registerRole = "customer";
+        boolean registered1 = Helpers.registerUser(connection, registerName, registerPassword, registerEmail, registerRole);
+        boolean registered2 = Helpers.registerUser(connection, registerName, registerPassword, registerEmail, registerRole);
+        assertFalse(registered2);
 
+    }
 
+    @Test
+    //login(Connection connection, String name, String password)
+    public void loginCustomerSuccess() throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String loginName = "LoginTester";
+        String loginPassword = "ValidPass123";
+        Helpers.registerUser(connection, loginName, loginPassword, "logintester@gmail.com", "customer");
+        String expectedRole = "customer";
+        String recievedRole = Helpers.login(connection, loginName, loginPassword);
+        assertEquals(expectedRole, recievedRole);
+    }
 
+    @Test
+    public void loginCustomerFail() throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+        String loginName = "LoginTesterFailer";
+        String loginPassword = "ValidPass123";
+        String loginWrongPassword = "ValidPass321";
+        Helpers.registerUser(connection, loginName, loginPassword, "logintester@gmail.com", "customer");
+        String recievedRole = Helpers.login(connection, loginName, loginWrongPassword);
+        assertNull(recievedRole);
+    }
 
 
 
@@ -83,7 +111,6 @@ public class HelpersConnectionTest {
                 statement = statement.trim();
                 if (!statement.isEmpty()) {
                     stmt.execute(statement);
-                    System.out.println("Executed: " + statement);
                 }
             }
             System.out.println("SQL script executed successfully.");
