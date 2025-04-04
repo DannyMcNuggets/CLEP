@@ -66,7 +66,33 @@ public class Queries {
         try (ResultSet rs = executeQuery(connection, query, customerID)){
             return rs.next() ? rs.getString("role") : null;
         }
+    }
 
+
+    public static ResultSet lookUpProduct(Connection connection, String product) throws SQLException {
+
+        String type = Helpers.productType(product);
+        String queryTemplate = "SELECT name, description, price, stock, ean FROM products WHERE %s = ?";
+        String query;
+
+        switch (type){
+            case "ean" -> query = String.format(queryTemplate, "ean");
+            case "name" -> query = String.format(queryTemplate, "name");
+            default -> {
+                return null;
+            }
+        }
+
+        return executeQuery(connection, query, product);
+    }
+
+    public static boolean isNumeric(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
 

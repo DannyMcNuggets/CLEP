@@ -7,6 +7,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HexFormat;
@@ -116,6 +117,39 @@ public class Helpers {
         }
 
         return true;
+    }
+
+
+    public static String productType(String product){
+        try {
+            Integer.parseInt(product);
+            return "ean";
+        } catch (NumberFormatException e) {
+            return "name";
+        }
+    }
+
+    public static String rsToString(ResultSet rs) throws SQLException {
+
+        StringBuilder sb = new StringBuilder();
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        // Append column names
+        for (int i = 1; i <= columnCount; i++) {
+            sb.append(metaData.getColumnName(i)).append("\t");
+        }
+        sb.append("\n");
+
+        // Append rows
+        while (rs.next()) {
+            for (int i = 1; i <= columnCount; i++) {
+                sb.append(rs.getString(i)).append("\t");
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 
 
