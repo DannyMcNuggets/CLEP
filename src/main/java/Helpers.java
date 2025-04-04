@@ -109,8 +109,6 @@ public class Helpers {
 
         byte [] salt = Helpers.generateSalt();
         byte [] passwordHash = Helpers.generateHash(salt, password);
-        System.out.println("Generated salt on registry: " + Helpers.byteToString(salt));
-        System.out.println("Generated hash on registry: " + Helpers.byteToString(passwordHash));
 
         if(!Queries.insertSaltAndHash(connection, userID, passwordHash, salt)){
             System.out.println("could not insert credentials");
