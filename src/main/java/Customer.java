@@ -48,18 +48,8 @@ class Customer extends User {
         }
     }
 
+    // TODO: add some logic check: mb length, not empty, smthng else.
     private void handleLookUp(DataInputStream in, DataOutputStream out) throws IOException, SQLException {
-        /*
-        follow pattern:
-        String menu = dataInput.readUTF(); // Receive from server
-        System.out.println(menu);
-
-        String choice = userInput.readLine();
-        dataOutput.writeUTF(choice); // Send command
-        dataOutput.flush();
-
-        String response = dataInput.readUTF(); // read response
-         */
 
         out.writeUTF("Type product name or ean");
 
@@ -67,7 +57,6 @@ class Customer extends User {
 
         ResultSet rs = Queries.lookUpProduct(connection, product);
 
-        if (rs != null) out.writeUTF(Helpers.rsToString(rs));
-        else out.writeUTF("haven't found the product");
+        out.writeUTF(Helpers.rsToString(rs));
     }
 }

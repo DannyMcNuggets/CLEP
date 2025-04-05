@@ -72,7 +72,7 @@ public class Queries {
     public static ResultSet lookUpProduct(Connection connection, String product) throws SQLException {
 
         String type = Helpers.productType(product);
-        String queryTemplate = "SELECT name, description, price, stock, ean FROM products WHERE %s = ?";
+        String queryTemplate = "SELECT name, description, price, stock, ean FROM products WHERE %s LIKE ?";
         String query;
 
         switch (type){
@@ -83,16 +83,15 @@ public class Queries {
             }
         }
 
-        return executeQuery(connection, query, product);
-    }
+        String wildcardProduct = "%" + product + "%";
 
-    public static boolean isNumeric(String str) {
-        try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
+        ResultSet rs = executeQuery(connection, query, wildcardProduct);
+        if (rs.isBeforeFirst()) {
+            return rs;
         }
+
+        String queryByDescription = "SELECT name, description, price, stock, ean FROM products WHERE description LIKE ?";
+        return executeQuery(connection, queryByDescription, wildcardProduct);
     }
 
 
