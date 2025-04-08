@@ -15,7 +15,7 @@ class Customer extends User {
 
     @Override
     protected String getMenu() {
-        return "\n=== Customer Menu ===\n1 - VIEW_ORDERS\n2 - LOOK_UP\n3 - LOGOUT\nEnter choice:";
+        return "\n=== Customer Menu. Type in the number of command ===\n1 - VIEW_ORDERS\n2 - LOOK_UP\n3 - LOGOUT\nEnter choice:";
     }
 
 
@@ -23,7 +23,7 @@ class Customer extends User {
     void handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException {
         System.out.println("Recieved command!");
         switch (command) {
-            case "VIEW_ORDERS" -> {
+            case "1" -> {
                 System.out.println("Recieved VIEW ORDERS!!!"); // replace rs to string later
                 /*
                 ResultSet rs = Queries.getAllOrders(connection);
@@ -35,12 +35,12 @@ class Customer extends User {
 
                 out.writeUTF("well we got where needed, we just need to rework the packet...");
             }
-            case "LOGOUT" -> {
+            case "3" -> {
                 out.writeUTF("Logging off...");
                 out.flush();
             }
-            case "LOOK_UP" -> {
-                out.writeUTF("Okay! let's look up!");
+            case "2" -> {
+                out.writeUTF("Okay! let's look up!    you can try looking for 'TestProduct' by name, part of name, description, EAN: 56902716");
                 out.flush();
                 handleLookUp(in, out);
             }

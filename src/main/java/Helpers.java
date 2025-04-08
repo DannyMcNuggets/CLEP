@@ -81,7 +81,7 @@ public class Helpers {
         }
     }
 
-
+    // TODO: break into small methods that return codes!
     public static boolean registerUser(Connection connection, String name, String password, String email, String role) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         if(Queries.checkIfNameTaken(connection, name)){
             System.out.println("name is taken");
