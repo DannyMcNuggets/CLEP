@@ -1,5 +1,11 @@
 #  command-line e-pood
 
+## Käivatamise juhend
+Esmalt tuleb käivitada **Main** klass, mis töötab serverina.
+
+Seejärel käivita **Client** ja järgi terminali juhiseid.
+
+
 ## Funktsionaalsus
 -   Server hoiab laoseisu ja tellimusi.
 -   Sisselogitud töötajad saavad laoseisu muuta ja tellimusi vaadata.
@@ -12,9 +18,9 @@
 ## Framework
 **JavaMail API**
 
-**SQLite ja JDBC**:   
+**SQLite ja JDBC**:
 - Laoseis ja tooted
-- Kasutaja sisselogimisandmed (kasutajanimed, paroolide hashid)  
+- Kasutaja sisselogimisandmed (kasutajanimed, paroolide hashid)
 - Tellimused
 
 ### Rühmaliikmed
