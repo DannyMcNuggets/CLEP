@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 public class Employee extends User{
 
-    public Employee(int userID, Connection connection) {
-        super(userID, connection);
+    public Employee(int userID, Queries queries, Helpers helpers) {
+        super(userID, queries, helpers);
     }
 
     @Override

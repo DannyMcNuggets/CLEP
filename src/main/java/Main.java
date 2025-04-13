@@ -12,14 +12,17 @@ public class Main {
     public static void main(String[] args) throws SQLException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         connection = initiateConnection(DB_PATH);
 
+        Queries queries = new Queries(connection);
+        Helpers helpers = new Helpers(queries);
+
         try (ServerSocket ss = new ServerSocket(8080)) {
             while (true) {
                 try (Socket socket = ss.accept()) {
                     DataInputStream input = new DataInputStream(socket.getInputStream());
                     DataOutputStream output = new DataOutputStream(socket.getOutputStream());
                     System.out.println("ffs work");
-                    User user = handleClient(socket, connection, input, output);
-                    if (user != null) user.handleSession(socket, input, output);
+                    User user = handleClient(input, output, queries, helpers);
+                    if (user != null) user.handleSession(socket);
                 }
             }
         }
@@ -32,7 +35,7 @@ public class Main {
 
 
     // TODO: handle client log in (provide username and password), then verify his role and create object. Move to Helpers!
-    private static User handleClient(Socket socket, Connection connection,  DataInputStream input,  DataOutputStream output) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private static User handleClient(DataInputStream input,  DataOutputStream output,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
         output.writeUTF("Welcome to Store CLI!\n1 - Login\n2 - Register");
 
@@ -42,15 +45,15 @@ public class Main {
         User user = null;
 
         switch (choice) {
-            case 1 -> user = login(input, output);
+            case 1 -> user = login(input, output, queries, helpers);
             case 2 -> {
-                boolean success = register(input, output);
+                boolean success = register(input, output, queries, helpers);
                 if (!success) {
                     output.writeUTF("registration fail");
                     return null;
                 } else {
                     output.writeUTF("registration success");
-                    return login(input, output);
+                    return login(input, output, queries, helpers);
                 }
             }
             default -> {
@@ -65,7 +68,7 @@ public class Main {
 
 
 
-    private static User login(DataInputStream input, DataOutputStream output)
+    private static User login(DataInputStream input, DataOutputStream output, Queries queries, Helpers helpers)
             throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
         System.out.println("we are in login section");
@@ -75,7 +78,7 @@ public class Main {
             if (username.equalsIgnoreCase("END")) return null;
             System.out.println("username is: " + username);
 
-            int userID = Queries.getUserID(connection, username);
+            int userID = queries.getUserID(username);
             System.out.println("user id is:" + userID);
             if (userID == -1) {
                 output.writeUTF("Invalid username. Try again.");
@@ -86,20 +89,20 @@ public class Main {
                 output.writeUTF("Enter password:");
                 String password = input.readUTF();
 
-                if (!Helpers.verifyPassword(connection, userID, password)) {
+                if (!helpers.verifyPassword(userID, password)) {
                     output.writeUTF("Incorrect password. Try again or type END to re-enter username.");
                     String retry = input.readUTF();
                     if (retry.equalsIgnoreCase("END")) break; // break inner loop to ask for username again
                     else password = retry; // reuse input as new password
                 }
 
-                if (Helpers.verifyPassword(connection, userID, password)) {
-                    String role = Queries.getUserRole(connection, userID);
+                if (helpers.verifyPassword(userID, password)) {
+                    String role = queries.getUserRole(userID);
 
                     return switch (role) {
-                        case "customer" -> new Customer(userID, connection);
-                        case "admin" -> new Admin(userID, connection);
-                        case "employee" -> new Employee(userID, connection);
+                        case "customer" -> new Customer(userID, queries, helpers);
+                        case "admin" -> new Admin(userID, queries, helpers);
+                        case "employee" -> new Employee(userID, queries, helpers);
                         default -> null;
                     };
                 }
@@ -109,7 +112,7 @@ public class Main {
 
 
 
-    private static boolean register(DataInputStream input, DataOutputStream output)
+    private static boolean register(DataInputStream input, DataOutputStream output, Queries queries, Helpers helpers)
             throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
         String username = null;
@@ -122,7 +125,7 @@ public class Main {
             output.writeUTF("Enter username:");
             username = input.readUTF();
 
-            if (Queries.checkIfNameTaken(connection, username)) {
+            if (queries.checkIfNameTaken(username)) {
                 output.writeUTF("Username already taken.");
             } else {
                 output.writeUTF("OK");
@@ -135,7 +138,7 @@ public class Main {
             output.writeUTF("Enter email:");
             email = input.readUTF();
 
-            if (!Helpers.emailValidate(email)) {
+            if (!helpers.emailValidate(email)) {
                 output.writeUTF("Invalid email.");
             } else {
                 output.writeUTF("OK");
@@ -148,7 +151,7 @@ public class Main {
             output.writeUTF("Enter password:");
             password = input.readUTF();
 
-            if (!Helpers.passwordValid(password)) {
+            if (!helpers.passwordValid(password)) {
                 output.writeUTF("Weak password.");
             } else {
                 output.writeUTF("OK");
@@ -157,18 +160,18 @@ public class Main {
         }
 
         // STEP 4: Finalize registration
-        if (Queries.insertUser(connection, username, email, "customer")){
-            if (Queries.getUserID(connection, username) == -1) {
+        if (queries.insertUser(username, email, "customer")){
+            if (queries.getUserID(username) == -1) {
                 output.writeUTF("Failed to insert user.");
                 return false;
             }
         }
 
 
-        byte[] salt = Helpers.generateSalt();
-        byte[] hash = Helpers.generateHash(salt, password);
+        byte[] salt = helpers.generateSalt();
+        byte[] hash = helpers.generateHash(salt, password);
 
-        if (!Queries.insertSaltAndHash(connection, userID, hash, salt)) {
+        if (!queries.insertSaltAndHash(userID, hash, salt)) {
             output.writeUTF("Failed to store credentials.");
             return false;
         }

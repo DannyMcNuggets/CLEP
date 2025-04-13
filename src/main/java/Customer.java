@@ -8,8 +8,8 @@ import java.sql.SQLException;
 class Customer extends User {
 
 
-    public Customer(int userID, Connection connection) {
-        super(userID, connection);
+    public Customer(int userID, Queries queries, Helpers helpers) {
+        super(userID, queries, helpers);
     }
 
 
@@ -55,8 +55,8 @@ class Customer extends User {
 
         String product = in.readUTF();
 
-        ResultSet rs = Queries.lookUpProduct(connection, product);
+        ResultSet rs = queries.lookUpProduct(product);
 
-        out.writeUTF(Helpers.rsToString(rs));
+        out.writeUTF(helpers.rsToString(rs));
     }
 }

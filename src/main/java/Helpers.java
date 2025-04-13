@@ -16,8 +16,14 @@ import java.util.regex.Pattern;
 
 public class Helpers {
 
+    private final Queries queries;
 
-    public static byte [] generateSalt(){
+    public Helpers(Queries queries){
+        this.queries = queries;
+    }
+
+
+    public byte [] generateSalt(){
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);
@@ -25,7 +31,7 @@ public class Helpers {
     }
 
 
-    public static byte [] generateHash(byte [] salt, String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public byte [] generateHash(byte [] salt, String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 128);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         return factory.generateSecret(spec).getEncoded();
@@ -50,23 +56,23 @@ public class Helpers {
     }
 
 
-    public static String login(Connection connection, String name, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public String login(String name, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         // check if userID exists and retrieve it
-        int userID = Queries.getUserID(connection, name);
+        int userID = queries.getUserID(name);
         if (userID == -1 ) return null;
 
         // verify password
-        if (verifyPassword(connection, userID, password)){
+        if (verifyPassword(userID, password)){
             // give role
-            return Queries.getUserRole(connection, userID);
+            return queries.getUserRole(userID);
         } else {
             return null;
         }
     }
 
 
-    public static boolean verifyPassword(Connection connection, int userID, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
-        try (ResultSet rs = Queries.getSaltandHash(connection, userID)){
+    public boolean verifyPassword(int userID, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+        try (ResultSet rs = queries.getSaltandHash(userID)){
             if (!rs.next()){
                 System.out.println("no salt and/or hash found for user");
                 return false;

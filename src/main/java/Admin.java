@@ -7,8 +7,8 @@ import java.sql.SQLException;
 public class Admin extends User{
 
 
-    public Admin(int userID, Connection connection) {
-        super(userID, connection);
+    public Admin(int userID, Queries queries, Helpers helpers) {
+        super(userID, queries, helpers);
     }
 
 

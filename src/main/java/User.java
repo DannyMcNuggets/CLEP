@@ -6,12 +6,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public abstract class User {
-    private int userID;
-    protected Connection connection;
+    protected int userID;
+    protected Queries queries;
+    protected Helpers helpers;
 
-    public User(int userID, Connection connection){
+    public User(int userID, Queries queries, Helpers helpers){
         this.userID = userID;
-        this.connection = connection;
+        this.queries = queries;
+        this.helpers = helpers;
     }
 
     void handleSession(Socket socket) throws IOException, SQLException {
