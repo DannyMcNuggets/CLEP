@@ -20,43 +20,38 @@ class Customer extends User {
 
 
     @Override
-    void handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException {
-        System.out.println("Recieved command!");
+    int handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException {
         switch (command) {
             case "1" -> {
-                System.out.println("Recieved VIEW ORDERS!!!"); // replace rs to string later
-                /*
-                ResultSet rs = Queries.getAllOrders(connection);
-                Packet packet = new Packet(rs);
-                ObjectOutputStream objectOutput = new ObjectOutputStream(out);
-                objectOutput.writeObject(packet);
-                objectOutput.flush();
-                 */
-
-                out.writeUTF("well we got where needed, we just need to rework the packet...");
+                ResultSet rs = queries.getAllOrders();
+                out.writeUTF(Helpers.rsToString(rs) + "\n press any key to exit to menu");
+                return 1;
             }
             case "3" -> {
                 out.writeUTF("Logging off...");
                 out.flush();
+                return 3;
             }
             case "2" -> {
-                out.writeUTF("Okay! let's look up!    you can try looking for 'TestProduct' by name, part of name, description, EAN: 56902716");
-                out.flush();
                 handleLookUp(in, out);
+                return 2;
             }
-            default -> out.writeUTF("Invalid command");
+            default -> {
+                out.writeUTF("Invalid command");
+                return 4;
+            }
         }
     }
 
     // TODO: add some logic check: mb length, not empty, smthng else.
     private void handleLookUp(DataInputStream in, DataOutputStream out) throws IOException, SQLException {
 
-        out.writeUTF("Type product name or ean");
+        out.writeUTF("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
 
         String product = in.readUTF();
 
         ResultSet rs = queries.lookUpProduct(product);
 
-        out.writeUTF(helpers.rsToString(rs));
+        out.writeUTF(Helpers.rsToString(rs) + "\n press any key to exit to menu");
     }
 }

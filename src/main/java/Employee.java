@@ -16,21 +16,24 @@ public class Employee extends User{
     }
 
     @Override
-    void handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException {
+    int handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException {
         switch (command) {
             case "VIEW_ORDERS" -> {
                 out.writeUTF("Display all orders");
+                return 1;
             }
             case "IDK" -> {
                 out.writeUTF("IDK, smthng");
+                return 2;
             }
             case "LOGOUT" -> {
                 out.writeUTF("Logging off...");
+                return 3;
             }
             default -> {
                 out.writeUTF("Wrong command, try again.");
+                return 4;
             }
         }
-        out.flush();
     }
 }

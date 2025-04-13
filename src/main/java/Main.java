@@ -20,7 +20,6 @@ public class Main {
                 try (Socket socket = ss.accept()) {
                     DataInputStream input = new DataInputStream(socket.getInputStream());
                     DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-                    System.out.println("ffs work");
                     User user = handleClient(input, output, queries, helpers);
                     if (user != null) user.handleSession(socket);
                 }
@@ -37,7 +36,7 @@ public class Main {
     // TODO: handle client log in (provide username and password), then verify his role and create object. Move to Helpers!
     private static User handleClient(DataInputStream input,  DataOutputStream output,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
-        output.writeUTF("Welcome to Store CLI!\n1 - Login\n2 - Register");
+        output.writeUTF("Welcome to CLEP!\n1 - Login\n2 - Register");
 
         String choiceStr = input.readUTF();
         int choice = Integer.parseInt(choiceStr.trim());

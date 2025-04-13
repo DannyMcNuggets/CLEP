@@ -25,15 +25,18 @@ public abstract class User {
             output.flush();
 
             String command = input.readUTF(); // Read command from client
-            handleCommand(command, input, output);
-            if (command.equals("LOGOUT")) {
+            int code = handleCommand(command, input, output);
+            output.flush();
+            if (code == 3) {
+                System.out.println("we are closing socket like right now");
                 socket.close();
                 break;
             }
+            input.readUTF();
         }
     }
 
     abstract String getMenu();
 
-    abstract void handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException;
+    abstract int handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException;
 }

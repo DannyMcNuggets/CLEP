@@ -19,21 +19,24 @@ public class Admin extends User{
 
 
     @Override
-    void handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException {
+    int handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException {
         switch (command){
             case "VIEW_ORDERS" -> {
                 out.writeUTF("Display all orders");
+                return 1;
             }
             case "MANAGE_USERS" -> {
                 out.writeUTF("Manage and display all users");
+                return 2;
             }
             case "LOGOUT" -> {
                 out.writeUTF("Logging off...");
+                return 3;
             }
             default -> {
                 out.writeUTF("Wrong command, try again.");
+                return 4;
             }
         }
-        out.flush();
     }
 }
