@@ -20,7 +20,7 @@ public class Main {
                 try (Socket socket = ss.accept()) {
                     DataInputStream input = new DataInputStream(socket.getInputStream());
                     DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-                    User user = handleClient(input, output, queries, helpers);
+                    User user = handleClient(input, output, queries, helpers, socket);
                     if (user != null) user.handleSession(socket);
                 }
             }
@@ -34,12 +34,21 @@ public class Main {
 
 
     // TODO: handle client log in (provide username and password), then verify his role and create object. Move to Helpers!
-    private static User handleClient(DataInputStream input,  DataOutputStream output,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private static User handleClient(DataInputStream input,  DataOutputStream output,  Queries queries, Helpers helpers, Socket socket) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
         output.writeUTF("Welcome to CLEP!\n1 - Login\n2 - Register");
 
         String choiceStr = input.readUTF();
-        int choice = Integer.parseInt(choiceStr.trim());
+
+        // TODO: rework this mess
+        int choice;
+        try {
+            choice = Integer.parseInt(choiceStr.trim());
+        } catch (NumberFormatException e) {
+            output.writeUTF("wrong choice, try again");
+            socket.close();
+            return null;
+        }
 
         User user = null;
 
@@ -51,12 +60,11 @@ public class Main {
                     output.writeUTF("registration fail");
                     return null;
                 } else {
-                    output.writeUTF("registration success");
                     return login(input, output, queries, helpers);
                 }
             }
             default -> {
-                output.writeUTF("Invalid choice. Disconnecting.");
+                System.out.println("wrong input from user");
                 output.writeUTF("EXIT");
                 return null;
             }
@@ -120,52 +128,49 @@ public class Main {
         int userID = 0;
 
         // STEP 1: Ask for username
+        output.writeUTF("Enter username:");
         while (true) {
-            output.writeUTF("Enter username:");
             username = input.readUTF();
-
             if (queries.checkIfNameTaken(username)) {
-                output.writeUTF("Username already taken.");
+                output.writeUTF("Username already taken. Try again:");
             } else {
-                output.writeUTF("OK");
                 break;
             }
         }
 
         // STEP 2: Ask for email
+        output.writeUTF("Enter email:");
         while (true) {
-            output.writeUTF("Enter email:");
             email = input.readUTF();
 
-            if (!helpers.emailValidate(email)) {
-                output.writeUTF("Invalid email.");
-            } else {
-                output.writeUTF("OK");
+            if (Helpers.emailValidate(email)) {
                 break;
+            } else {
+                output.writeUTF("Invalid email. Enter again: ");
             }
         }
 
         // STEP 3: Ask for password
+        output.writeUTF("Enter password. Must include high and low case, a digit, a letter, 8 symbols length\":");
         while (true) {
-            output.writeUTF("Enter password:");
             password = input.readUTF();
-
-            if (!helpers.passwordValid(password)) {
-                output.writeUTF("Weak password.");
+            if (Helpers.passwordValid(password)) {
+               break;
             } else {
-                output.writeUTF("OK");
-                break;
+                output.writeUTF("Weak password. Must include high and low case, a digit, a letter, 8 symbols length. Try again");
             }
         }
 
-        // STEP 4: Finalize registration
+        // TODO: STEP 4: repeat password
+
+        // STEP 5: Finalize registration
         if (queries.insertUser(username, email, "customer")){
-            if (queries.getUserID(username) == -1) {
+            userID = queries.getUserID(username);
+            if (userID == -1) {
                 output.writeUTF("Failed to insert user.");
                 return false;
             }
         }
-
 
         byte[] salt = helpers.generateSalt();
         byte[] hash = helpers.generateHash(salt, password);
@@ -175,7 +180,8 @@ public class Main {
             return false;
         }
 
-        output.writeUTF("Registration successful!");
+        output.writeUTF("Registration successful! Press any key to proceed to login");
+        input.readUTF();
         return true;
     }
 

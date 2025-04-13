@@ -14,7 +14,7 @@ public class Client {
                 String serverMessage = dataInput.readUTF();
                 System.out.println(serverMessage);
 
-                if (serverMessage.equalsIgnoreCase("Logging off...")) { // rework to codes
+                if (serverMessage.equalsIgnoreCase("Logging off...") || serverMessage.equalsIgnoreCase("wrong choice, try again")) { // rework to codes
                     break;
                 }
 
