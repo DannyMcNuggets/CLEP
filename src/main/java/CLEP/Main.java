@@ -33,7 +33,6 @@ public class Main {
                     DataOutputStream output = new DataOutputStream(socket.getOutputStream());
                     IOUnit io = new IOUnit(input, output);
 
-
                     User user = handleClient(io, queries, helpers);
                     if (user != null) user.handleSession(io);
                     else output.writeUTF("Logging off..."); // rework this
@@ -48,7 +47,6 @@ public class Main {
     }
 
 
-    // TODO: handle client log in (provide username and password), then verify his role and create object. Move to Helpers!
     private static User handleClient(IOUnit io,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
         Auth auth = new Auth(io, queries, helpers);
