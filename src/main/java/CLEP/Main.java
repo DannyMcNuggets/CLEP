@@ -1,9 +1,19 @@
+package CLEP;
+
+import CLEP.UserRoles.Admin;
+import CLEP.UserRoles.Customer;
+import CLEP.UserRoles.Employee;
+import CLEP.UserRoles.User;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
+
+import CLEP.util.Helpers;
+import CLEP.util.Queries;
 
 public class Main {
     private static Connection connection;

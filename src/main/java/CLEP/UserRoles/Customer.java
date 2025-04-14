@@ -1,11 +1,14 @@
+package CLEP.UserRoles;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import CLEP.util.Helpers;
+import CLEP.util.Queries;
 
-class Customer extends User {
+public class Customer extends User {
 
 
     public Customer(int userID, Queries queries, Helpers helpers) {
@@ -15,7 +18,7 @@ class Customer extends User {
 
     @Override
     protected String getMenu() {
-        return "\n=== Customer Menu. Type in the number of command ===\n1 - VIEW_ORDERS\n2 - LOOK_UP\n3 - LOGOUT\nEnter choice:";
+        return "\n=== UserRoles.Customer Menu. Type in the number of command ===\n1 - VIEW_ORDERS\n2 - LOOK_UP\n3 - LOGOUT\nEnter choice:";
     }
 
 

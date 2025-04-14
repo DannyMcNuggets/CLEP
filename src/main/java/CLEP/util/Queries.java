@@ -1,3 +1,5 @@
+package CLEP.util;
+
 import java.sql.*;
 
 public class Queries {

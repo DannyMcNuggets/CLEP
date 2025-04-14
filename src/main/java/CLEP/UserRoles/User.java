@@ -1,9 +1,13 @@
+package CLEP.UserRoles;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.sql.Connection;
 import java.sql.SQLException;
+import CLEP.util.Helpers;
+import CLEP.util.Queries;
+
 
 public abstract class User {
     protected int userID;
@@ -16,7 +20,7 @@ public abstract class User {
         this.helpers = helpers;
     }
 
-    void handleSession(Socket socket) throws IOException, SQLException {
+    public void handleSession(Socket socket) throws IOException, SQLException {
         DataInputStream input = new DataInputStream(socket.getInputStream());
         DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 

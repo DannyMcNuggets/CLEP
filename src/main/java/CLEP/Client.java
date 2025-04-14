@@ -1,9 +1,10 @@
+package CLEP;
+
 import java.io.*;
 import java.net.Socket;
 
 public class Client {
 
-    // TODO: break into different methods!
     public static void main(String[] args) throws IOException {
         try (Socket socket = new Socket("localhost", 8080);
              BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));

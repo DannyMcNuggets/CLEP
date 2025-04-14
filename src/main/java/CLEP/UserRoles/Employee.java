@@ -1,8 +1,11 @@
+package CLEP.UserRoles;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
+import CLEP.util.Helpers;
+import CLEP.util.Queries;
 
 public class Employee extends User{
 
@@ -12,7 +15,7 @@ public class Employee extends User{
 
     @Override
     String getMenu() {
-        return "\n=== Admin Menu ===\n1 - VIEW_ORDERS\n2 - IDK\n3 - LOGOUT\nEnter choice:";
+        return "\n=== UserRoles.Admin Menu ===\n1 - VIEW_ORDERS\n2 - IDK\n3 - LOGOUT\nEnter choice:";
     }
 
     @Override
