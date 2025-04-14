@@ -56,7 +56,7 @@ public class Helpers {
         return matcher.matches();
     }
 
-
+    /*
     public String login(String name, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         // check if userID exists and retrieve it
         int userID = queries.getUserID(name);
@@ -70,6 +70,7 @@ public class Helpers {
             return null;
         }
     }
+     */
 
 
     public boolean verifyPassword(int userID, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {

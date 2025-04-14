@@ -55,9 +55,9 @@ public class Queries {
     }
 
 
-    public boolean checkIfNameTaken(String name) throws SQLException {
+    public boolean checkIfNameFree(String name) throws SQLException {
         String query = "SELECT 1 FROM users WHERE username = ?";
-        return executeQuery(query,name).next();
+        return !executeQuery(query,name).next();
     }
 
 
