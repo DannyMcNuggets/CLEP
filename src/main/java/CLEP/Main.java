@@ -1,8 +1,5 @@
 package CLEP;
 
-import CLEP.UserRoles.Admin;
-import CLEP.UserRoles.Customer;
-import CLEP.UserRoles.Employee;
 import CLEP.UserRoles.User;
 
 import java.io.*;
@@ -15,11 +12,13 @@ import java.sql.*;
 import CLEP.auth.Auth;
 import CLEP.auth.Register;
 import CLEP.util.Helpers;
+import CLEP.util.IOUnit;
 import CLEP.util.Queries;
 
 public class Main {
     private static Connection connection;
     private static final String DB_PATH = "database.db";
+    private static final int MAX_ATTEMPTS = 4;
 
     public static void main(String[] args) throws SQLException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         connection = initiateConnection(DB_PATH);
@@ -32,8 +31,11 @@ public class Main {
                 try (Socket socket = ss.accept()) {
                     DataInputStream input = new DataInputStream(socket.getInputStream());
                     DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-                    User user = handleClient(input, output, queries, helpers);
-                    if (user != null) user.handleSession(socket);
+                    IOUnit io = new IOUnit(input, output);
+
+
+                    User user = handleClient(io, queries, helpers);
+                    if (user != null) user.handleSession(io);
                     else output.writeUTF("Logging off..."); // rework this
                 }
             }
@@ -47,44 +49,42 @@ public class Main {
 
 
     // TODO: handle client log in (provide username and password), then verify his role and create object. Move to Helpers!
-    private static User handleClient(DataInputStream input,  DataOutputStream output,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private static User handleClient(IOUnit io,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
-        Auth auth = new Auth(input, output, queries, helpers);
-        Register register = new Register(input, output, queries, helpers);
+        Auth auth = new Auth(io, queries, helpers);
+        Register register = new Register(io, queries, helpers);
 
-        output.writeUTF("Welcome to CLEP!\n1 - Login\n2 - Register");
+        io.write("Welcome to CLEP!\n1 - Login\n2 - Register");
 
-        switch (getUserChoice(input, output)) {
+        switch (getUserChoice(io)) {
             case 1 -> {
                 return auth.login();
             }
             case 2 -> {
-                if (!register.register()) {
-                    output.writeUTF("registration fail");
-                    return null;
-                } else {
+                if (register.register()) {
                     return auth.login();
+                } else {
+                    return null;
                 }
             }
             default -> {
-                output.writeUTF("Logging off...");
                 return null;
             }
         }
     }
 
 
-    private static int getUserChoice(DataInputStream input, DataOutputStream output) throws IOException {
+    private static int getUserChoice(IOUnit io) throws IOException {
         int attempts = 0;
-        while (true){
-            String choiceStr = input.readUTF();
+        while (attempts < MAX_ATTEMPTS){
+            String choiceStr = io.read();
             try {
-                if (attempts >= 4) return 0;
                 return Integer.parseInt(choiceStr.trim());
             } catch (NumberFormatException e) {
                 attempts++;
-                output.writeUTF("Provide a digit for a choice: ");
+                io.write("Provide a digit for a choice: ");
             }
         }
+        return 0;
     }
 }

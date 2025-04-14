@@ -1,11 +1,10 @@
 package CLEP.UserRoles;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
 import CLEP.util.Helpers;
+import CLEP.util.IOUnit;
 import CLEP.util.Queries;
 
 
@@ -20,27 +19,24 @@ public abstract class User {
         this.helpers = helpers;
     }
 
-    public void handleSession(Socket socket) throws IOException, SQLException {
-        DataInputStream input = new DataInputStream(socket.getInputStream());
-        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+    public void handleSession(IOUnit io) throws IOException, SQLException {
 
         while (true) {
-            output.writeUTF(getMenu());
-            output.flush();
+            io.write(getMenu());
+            io.flush();
 
-            String command = input.readUTF(); // Read command from client
-            int code = handleCommand(command, input, output);
-            output.flush();
+            String command = io.read(); // Read command from client
+            int code = handleCommand(command, io);
+            io.flush();
             if (code == 3) {
                 System.out.println("we are closing socket like right now");
-                socket.close();
                 break;
             }
-            input.readUTF();
+            io.read();
         }
     }
 
     abstract String getMenu();
 
-    abstract int handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException;
+    abstract int handleCommand(String command, IOUnit io) throws IOException, SQLException;
 }

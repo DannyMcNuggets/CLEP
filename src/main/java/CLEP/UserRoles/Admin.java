@@ -1,10 +1,9 @@
 package CLEP.UserRoles;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import CLEP.util.Helpers;
+import CLEP.util.IOUnit;
 import CLEP.util.Queries;
 
 public class Admin extends User{
@@ -22,22 +21,22 @@ public class Admin extends User{
 
 
     @Override
-    int handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException {
+    int handleCommand(String command, IOUnit io) throws IOException, SQLException {
         switch (command){
             case "VIEW_ORDERS" -> {
-                out.writeUTF("Display all orders");
+                io.write("Display all orders");
                 return 1;
             }
             case "MANAGE_USERS" -> {
-                out.writeUTF("Manage and display all users");
+               io.write("Manage and display all users");
                 return 2;
             }
             case "LOGOUT" -> {
-                out.writeUTF("Logging off...");
+                io.write("Logging off...");
                 return 3;
             }
             default -> {
-                out.writeUTF("Wrong command, try again.");
+                io.write("Wrong command, try again.");
                 return 4;
             }
         }

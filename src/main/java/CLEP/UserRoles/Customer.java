@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import CLEP.util.Helpers;
+import CLEP.util.IOUnit;
 import CLEP.util.Queries;
 
 public class Customer extends User {
@@ -23,38 +24,38 @@ public class Customer extends User {
 
 
     @Override
-    int handleCommand(String command, DataInputStream in, DataOutputStream out) throws IOException, SQLException {
+    int handleCommand(String command, IOUnit io) throws IOException, SQLException {
         switch (command) {
             case "1" -> {
                 ResultSet rs = queries.getAllOrders();
-                out.writeUTF(Helpers.rsToString(rs) + "\n press any key to exit to menu");
+                io.write(Helpers.rsToString(rs) + "\n press any key to exit to menu");
                 return 1;
             }
             case "3" -> {
-                out.writeUTF("Logging off...");
-                out.flush();
+                io.write("Logging off...");
+               io.flush();
                 return 3;
             }
             case "2" -> {
-                handleLookUp(in, out);
+                handleLookUp(io);
                 return 2;
             }
             default -> {
-                out.writeUTF("Invalid command");
+                io.write("Invalid command");
                 return 4;
             }
         }
     }
 
     // TODO: add some logic check: mb length, not empty, smthng else.
-    private void handleLookUp(DataInputStream in, DataOutputStream out) throws IOException, SQLException {
+    private void handleLookUp(IOUnit io) throws IOException, SQLException {
 
-        out.writeUTF("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
+        io.write("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
 
-        String product = in.readUTF();
+        String product = io.read();
 
         ResultSet rs = queries.lookUpProduct(product);
 
-        out.writeUTF(Helpers.rsToString(rs) + "\n press any key to exit to menu");
+        io.write(Helpers.rsToString(rs) + "\n press any key to exit to menu");
     }
 }

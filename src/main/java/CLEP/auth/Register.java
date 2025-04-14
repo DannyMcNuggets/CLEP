@@ -1,23 +1,20 @@
 package CLEP.auth;
 
 import CLEP.util.Helpers;
+import CLEP.util.IOUnit;
 import CLEP.util.Queries;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 
 public class Register {
-    DataInputStream input;
-    DataOutputStream output;
+    IOUnit io;
     Queries queries;
     Helpers helpers;
 
-    public Register(DataInputStream input, DataOutputStream output, Queries queries, Helpers helpers){
-        this.input = input;
-        this.output = output;
+    public Register(IOUnit io, Queries queries, Helpers helpers){
+        this.io = io;
         this.queries = queries;
         this.helpers = helpers;
     }
@@ -27,30 +24,33 @@ public class Register {
 
         // STEP 1: Ask for username
         String username = promptUsername();
+        if (username == null) return false;
 
         // STEP 2: Ask for email
         String email = promptEmail();
+        if (email == null) return false;
 
         // STEP 3: Ask for password
         String password = promptPassword();
+        if (password == null) return false;
 
         // TODO: STEP 4: repeat password
 
         // STEP 5: Finalize registration
         int userID = insertUser(username, email);
         if (userID == -1){
-            output.writeUTF("Failed to register");
+            io.write("Failed to register");
             return false;
         }
 
         // STEP 6: Insert credentials
         if (!insertCredentials(userID, password)){
-            output.writeUTF("Failed to insert credentials");
+           io.write("Failed to insert credentials");
             return false;
         }
 
-        output.writeUTF("Registration successful! Press any key to proceed to login");
-        input.readUTF();
+        io.write("Registration successful! Press any key to proceed to login");
+        io.read();
         return true;
     }
 
@@ -60,7 +60,7 @@ public class Register {
         byte[] hash = helpers.generateHash(salt, password);
 
         if (!queries.insertSaltAndHash(userID, hash, salt)) {
-            output.writeUTF("Failed to store credentials.");
+            io.write("Failed to store credentials.");
             return false;
         }
         return true;
@@ -108,13 +108,14 @@ public class Register {
 
     private String promptInput(String promptMessage, Validator validator, String errorMessage) throws IOException, SQLException {
         String inputStr = null;
-        output.writeUTF(promptMessage);
+        io.write(promptMessage);
         while (true) {
-            inputStr = input.readUTF();
+            inputStr = io.read();
+            if (inputStr.equals("END")) return null;
             if (validator.isValid(inputStr)) {
                 break;
             } else {
-                output.writeUTF(errorMessage);
+                io.write(errorMessage);
             }
         }
         return inputStr;
