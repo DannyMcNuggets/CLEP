@@ -78,27 +78,31 @@ public class Helpers {
     }
 
 
-    public static String rsToString(ResultSet rs) throws SQLException {
+    public static String rsToString(ResultSet rs, boolean singleRowOnly) throws SQLException {
+
         StringBuilder sb = new StringBuilder();
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
 
-        // Append column names
+       // column headers
         for (int i = 1; i <= columnCount; i++) {
             sb.append(metaData.getColumnName(i)).append("\t");
         }
         sb.append("\n");
 
-        // Append rows
+        // rows
         while (rs.next()) {
             for (int i = 1; i <= columnCount; i++) {
                 sb.append(rs.getString(i)).append("\t");
             }
             sb.append("\n");
+            if (singleRowOnly) break;
         }
 
         return sb.toString();
     }
+
+
 
 
     // mb... not sure
