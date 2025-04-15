@@ -1,7 +1,4 @@
--- "Foreign key constraints are disabled by default (for backwards compatibility), so must be enabled for each database connection separately."
-PRAGMA foreign_keys = ON;
-
-CREATE TABLE IF NOT EXISTS products (
+CREATE TABLE products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     description TEXT,
@@ -10,29 +7,29 @@ CREATE TABLE IF NOT EXISTS products (
     ean TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS orders (
+CREATE TABLE orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS order_items (
-     order_id INTEGER NOT NULL,
-     product_id INTEGER NOT NULL,
-     quantity INTEGER NOT NULL,
-     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+CREATE TABLE order_items (
+    order_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS product_views (
+CREATE TABLE product_views (
     product_id INTEGER NOT NULL,
     total_views INTEGER DEFAULT 0,
     latest_view_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     email TEXT NOT NULL,

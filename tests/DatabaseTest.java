@@ -17,6 +17,9 @@ import java.sql.Statement;
 
 public class DatabaseTest {
 
+
+    /* UNUSED
+
     private static final String TEST_DB_PATH ="test_database.db";
     private static final File dbFile = new File(TEST_DB_PATH);
     private static final String scriptSQL = "dbscript.sql";
@@ -66,4 +69,5 @@ public class DatabaseTest {
         dbFile.delete();
     }
 
+     */
 }
