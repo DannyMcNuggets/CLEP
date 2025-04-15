@@ -44,8 +44,9 @@ public class Helpers {
     }
 
 
-    public static boolean emailValidate(String EmailAddress){
-        return EmailValidator.getInstance().isValid(EmailAddress);
+    public static boolean emailValidate(String email){
+        return EmailValidator.getInstance().isValid(email);
+        //String re = "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
     }
 
 
@@ -56,31 +57,12 @@ public class Helpers {
         return matcher.matches();
     }
 
-    /*
-    public String login(String name, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
-        // check if userID exists and retrieve it
-        int userID = queries.getUserID(name);
-        if (userID == -1 ) return null;
-
-        // verify password
-        if (verifyPassword(userID, password)){
-            // give role
-            return queries.getUserRole(userID);
-        } else {
-            return null;
-        }
-    }
-     */
-
 
     public boolean verifyPassword(int userID, String password) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         try (ResultSet rs = queries.getSaltandHash(userID)){
             if (!rs.next()){
-                System.out.println("no salt and/or hash found for user");
                 return false;
             }
-
-            System.out.println("salt and hash found");
 
             byte [] salt = rs.getBytes("salt");
             byte [] storedHash = rs.getBytes("password_hash");
@@ -89,59 +71,14 @@ public class Helpers {
         }
     }
 
-    // TODO: break into small methods that return codes!
-    /*
-    public static boolean registerUser(Connection connection, String name, String password, String email, String role) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
-        if(Queries.checkIfNameTaken(connection, name)){
-            System.out.println("name is taken");
-            return false;
-        }
-
-        if (!Helpers.passwordValid(password)){
-            System.out.println("password invalid");
-            return false;
-        }
-
-        if (!Helpers.emailValidate(email)){
-            System.out.println("email invalid");
-            return false;
-        }
-
-        if(!Queries.insertUser(connection, name, email, role)){
-            return false;
-        }
-
-        int userID = Queries.getUserID(connection, name);
-        if (userID == -1){
-            System.out.println("could not find user with such name");
-            return false;
-        }
-
-        byte [] salt = Helpers.generateSalt();
-        byte [] passwordHash = Helpers.generateHash(salt, password);
-
-        if(!Queries.insertSaltAndHash(connection, userID, passwordHash, salt)){
-            System.out.println("could not insert credentials");
-            return false;
-        }
-
-        return true;
-    }
-
-     */
-
 
     public static String productType(String product){
-        try {
-            Integer.parseInt(product);
-            return "ean";
-        } catch (NumberFormatException e) {
-            return "name";
-        }
+        if (product != null && product.matches("\\d+")) return "ean";
+        else return "name";
     }
 
-    public static String rsToString(ResultSet rs) throws SQLException {
 
+    public static String rsToString(ResultSet rs) throws SQLException {
         StringBuilder sb = new StringBuilder();
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
