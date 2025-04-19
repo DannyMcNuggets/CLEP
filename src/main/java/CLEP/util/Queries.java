@@ -108,9 +108,9 @@ public class Queries {
         return executeQuery(query);
     }
 
-    public boolean deductStock(int stock, int id) throws SQLException {
-        String query = "UPDATE products SET stock = stock - ? WHERE id = ?";
-        return executeUpdate(query, stock, id);
+    public boolean deductStock(int amount, int id) throws SQLException {
+        String query = "UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?";
+        return executeUpdate(query, amount, id, amount);
     }
 
 
