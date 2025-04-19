@@ -81,12 +81,16 @@ public class Customer extends User {
         String productName = rs.getString("name");
         BigDecimal price = rs.getBigDecimal("price");
         BigDecimal totalCost = price.multiply(new BigDecimal(amount));
+        int item_id = rs.getInt("id");
 
         if (!confirmOrder(io, productName, totalCost, amount)) return;
 
         askForCSC(io);
 
-        // TODO: queries.change stock of product
+        if (!queries.deductStock(amount, item_id)){
+            io.write("error during deducting your order from database");
+            return;
+        }
 
         io.write("and email should be sent from here. Check mailbox for confirmation. Press any key to exit to menu");
     }
