@@ -80,7 +80,7 @@ public class Queries {
     public ResultSet lookUpProduct(String product) throws SQLException {
 
         String type = Helpers.productType(product);
-        String queryTemplate = "SELECT name, description, price, stock, ean FROM products WHERE %s LIKE ?";
+        String queryTemplate = "SELECT id, name, description, price, stock, ean FROM products WHERE %s LIKE ?";
         String query;
 
         switch (type){

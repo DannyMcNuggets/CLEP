@@ -81,6 +81,7 @@ public class Customer extends User {
         String productName = rs.getString("name");
         BigDecimal price = rs.getBigDecimal("price");
         BigDecimal totalCost = price.multiply(new BigDecimal(amount));
+        System.out.println(rs.getInt("id"));
         int item_id = rs.getInt("id");
 
         if (!confirmOrder(io, productName, totalCost, amount)) return;
@@ -110,11 +111,16 @@ public class Customer extends User {
 
 
     private int promptAmount(IOUnit io, int stock) throws IOException {
+        io.write("How many? Provide int. Available: " + stock);
         while (true) {
-            io.write("How many? Provide int. Available: " + stock);
-            int amount = Integer.parseInt(io.read());
-            if (amount <= stock) return amount;
-            io.write("Not enough stock. Try again.");
+            try {
+                int amount = Integer.parseInt(io.read());
+                if (amount <= stock) return amount;
+                io.write("Not enough stock. Try again.");
+            } catch (NumberFormatException e){
+
+            }
+
         }
     }
 
