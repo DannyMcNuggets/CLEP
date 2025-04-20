@@ -61,6 +61,13 @@ public class ClientConnection implements Runnable {
             //else output.writeUTF("Logging off..."); // rework this
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                dbConnection.close();
+            } catch (SQLException e) {
+                System.err.println("Could not close db connection properly");
+                e.printStackTrace();
+            }
         }
     }
 
