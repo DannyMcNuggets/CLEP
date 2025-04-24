@@ -70,8 +70,10 @@ public class Customer extends User {
 
         int amount = promptAmount(io, rs);
 
-        if (!confirmOrder(io, rs, amount)) return;
-
+        if (!confirmOrder(io, rs, amount)) {
+            io.write("ok, abandoning. press any key to exit to menu");
+            return;
+        }
         int item_id = rs.getInt("id");
 
         askForCSC(io);
@@ -87,48 +89,30 @@ public class Customer extends User {
 
     private ResultSet promptProductSelection(IOUnit io) throws IOException, SQLException {
         while (true) {
-            io.write("Provide product exact name or ean: ");
-            String product = io.read();
-            if (product.equals("END")) return null;
+            String product = Helpers.promptString(io, "Provide product exact name or ean:");
+            if (product == null) return null;
+
             ResultSet rs = queries.lookUpProduct(product);
-            io.write("this one?" + "\n" + Helpers.rsToString(rs, true) + "\n" + "type y for yes, n for no");
-            String choice = io.read();
-            if (choice.equalsIgnoreCase("y") || choice.equalsIgnoreCase("yes")) return rs;
-            if (choice.equalsIgnoreCase("END")) return null;
+            if (Helpers.promptYes(io, "This one?\n" + Helpers.rsToString(rs, true))) return rs;
         }
     }
 
 
     private int promptAmount(IOUnit io, ResultSet rs) throws IOException, SQLException {
         int stock = rs.getInt("stock");
-        io.write("How many? Provide int. Available: " + stock);
-        while (true) {
-            try {
-                int amount = Integer.parseInt(io.read());
-                if (amount <= stock && amount > 0) return amount;
-                io.write("Not enough in stock. Try again: ");
-            } catch (NumberFormatException e){
-                io.write("provide integer");
-            }
-        }
+        return Helpers.promptInt(io, "How many? Provide int. Available: " + stock, stock);
     }
 
 
     private boolean confirmOrder(IOUnit io, ResultSet rs, int amount) throws IOException, SQLException {
-        String productName = rs.getString("name");
+        String name = rs.getString("name");
         BigDecimal price = rs.getBigDecimal("price");
-        BigDecimal totalCost = price.multiply(new BigDecimal(amount));
-
-        io.write("Amount: " + amount + ". " + productName + ". Total sum: " + totalCost + "€"
-                + "\n Type y for confirm, n for not confirm");
-        String choice = io.read();
-        return choice.equalsIgnoreCase("y");
+        BigDecimal totalCost = price.multiply(BigDecimal.valueOf(amount));
+        return Helpers.promptYes(io, "Amount: " + amount + ". " + name + ". Total: " + totalCost + "€ ");
     }
 
 
     private void askForCSC(IOUnit io) throws IOException {
-        io.write("Enter CSC number from ur card as confirmation");
-        // TODO: validation!
-        io.read();
+        Helpers.promptString(io, "Enter CSC number from your card as confirmation:");
     }
 }

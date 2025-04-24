@@ -20,11 +20,11 @@ public class Employee extends User{
     @Override
     boolean handleCommand(String command, IOUnit io) throws IOException {
         switch (command) {
-            case "VIEW_ORDERS" -> {
+            case "1" -> {
                 io.write("Display all orders");
             }
-            case "IDK" -> {
-                io.write("IDK, smthng");
+            case "2" -> {
+                addProduct(io);
             }
             case "LOGOUT" -> {
                 io.write("Logging off...");
@@ -35,5 +35,15 @@ public class Employee extends User{
             }
         }
         return true;
+    }
+
+    private void addProduct(IOUnit io){
+        // getname
+        // description
+        // price
+        // current stock
+        // ean
+
+        // queries.addProduct()
     }
 }

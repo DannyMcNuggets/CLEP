@@ -3,6 +3,7 @@ package CLEP.util;
 import org.apache.commons.validator.routines.EmailValidator;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -102,7 +103,32 @@ public class Helpers {
         return sb.toString();
     }
 
+    public static String promptString(IOUnit io, String message) throws IOException {
+        io.write(message);
+        String input = io.read();
+        return input.equalsIgnoreCase("END") ? null : input;
+    }
 
+    public static boolean promptYes(IOUnit io, String message) throws IOException {
+        io.write(message + "\n type yes or y to agree");
+        String input = io.read();
+        return input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes");
+    }
+
+    public static int promptInt(IOUnit io, String message, int border) throws IOException {
+        io.write(message);
+        while (true){
+            String input = io.read();
+            if(input.equalsIgnoreCase("END")) return -1;
+            try {
+                int value = Integer.parseInt(input);
+                if (value <= border) return value;
+                io.write("Invalid number. Try again: ");
+            } catch (NumberFormatException e){
+                io.write("Please provide an integer.");
+            }
+        }
+    }
 
 
     // mb... not sure
