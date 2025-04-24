@@ -29,9 +29,8 @@ public class Auth {
             int userID = promptUsername();
             if (userID == 0) return null;
             int authenticated = promptPassword(userID);
-            if (authenticated == 0) continue;
             if(authenticated == 2) return null;
-            return createUserByRole(userID);
+            if(authenticated == 1) return createUserByRole(userID);
         }
     }
 
@@ -52,7 +51,6 @@ public class Auth {
 
 
     private int promptPassword(int userID) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
-
         io.write("Enter password:           tester123 password is Qwerty321");
         while (true) {
             String password = io.read();

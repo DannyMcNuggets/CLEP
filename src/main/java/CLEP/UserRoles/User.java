@@ -23,11 +23,9 @@ public abstract class User {
 
         while (true) {
             io.write(getMenu());
-            io.flush();
 
-            String command = io.read(); // Read command from client
+            String command = io.read();
             int code = handleCommand(command, io);
-            io.flush();
             if (code == 3) {
                 System.out.println("we are closing socket like right now");
                 break;

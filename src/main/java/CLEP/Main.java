@@ -19,7 +19,7 @@ import CLEP.util.Queries;
 public class Main {
     private static final String DB_PATH = "database.db";
 
-    public static void main(String[] args) throws SQLException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public static void main(String[] args) throws SQLException, IOException {
         try (ServerSocket ss = new ServerSocket(8080)) {
             while (true) {
                 new Thread(new ClientConnection(ss.accept(), initiateConnection(DB_PATH))).start();

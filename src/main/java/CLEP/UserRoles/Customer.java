@@ -29,7 +29,7 @@ public class Customer extends User {
                 "Enter choice:";
     }
 
-
+    // TODO: handle "END" at any step!
     @Override
     int handleCommand(String command, IOUnit io) throws IOException, SQLException {
         switch (command) {
@@ -73,7 +73,10 @@ public class Customer extends User {
 
     private void placeOrder(IOUnit io) throws IOException, SQLException {
         ResultSet rs = promptProductSelection(io);
-        if (rs == null) return;
+        if (rs == null) {
+            io.write("Ok, abandoning. Press any key to exit to menu");
+            return;
+        }
 
         int stock = Integer.parseInt(rs.getString("stock"));
         int amount = promptAmount(io, stock);
@@ -118,7 +121,7 @@ public class Customer extends User {
                 if (amount <= stock) return amount;
                 io.write("Not enough stock. Try again.");
             } catch (NumberFormatException e){
-
+                io.write("provide integer");
             }
 
         }
