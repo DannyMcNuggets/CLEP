@@ -21,24 +21,22 @@ public class Admin extends User{
 
 
     @Override
-    int handleCommand(String command, IOUnit io) throws IOException, SQLException {
+    boolean handleCommand(String command, IOUnit io) throws IOException {
         switch (command){
             case "VIEW_ORDERS" -> {
                 io.write("Display all orders");
-                return 1;
             }
             case "MANAGE_USERS" -> {
                io.write("Manage and display all users");
-                return 2;
             }
             case "LOGOUT" -> {
                 io.write("Logging off...");
-                return 3;
+                return false;
             }
             default -> {
                 io.write("Wrong command, try again.");
-                return 4;
             }
         }
+        return true;
     }
 }

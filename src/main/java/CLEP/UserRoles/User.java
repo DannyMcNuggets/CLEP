@@ -20,14 +20,10 @@ public abstract class User {
     }
 
     public void handleSession(IOUnit io) throws IOException, SQLException {
-
         while (true) {
             io.write(getMenu());
-
             String command = io.read();
-            int code = handleCommand(command, io);
-            if (code == 3) {
-                System.out.println("we are closing socket like right now");
+            if (!handleCommand(command, io)) {
                 break;
             }
             io.read();
@@ -36,5 +32,5 @@ public abstract class User {
 
     abstract String getMenu();
 
-    abstract int handleCommand(String command, IOUnit io) throws IOException, SQLException;
+    abstract boolean handleCommand(String command, IOUnit io) throws IOException, SQLException;
 }

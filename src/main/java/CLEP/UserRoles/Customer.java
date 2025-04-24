@@ -1,11 +1,8 @@
 package CLEP.UserRoles;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
@@ -13,11 +10,9 @@ import CLEP.util.Queries;
 
 public class Customer extends User {
 
-
     public Customer(int userID, Queries queries, Helpers helpers) {
         super(userID, queries, helpers);
     }
-
 
     @Override
     protected String getMenu() {
@@ -31,36 +26,31 @@ public class Customer extends User {
 
     // TODO: handle "END" at any step!
     @Override
-    int handleCommand(String command, IOUnit io) throws IOException, SQLException {
+    boolean handleCommand(String command, IOUnit io) throws IOException, SQLException {
         switch (command) {
             case "1" -> {
                 ResultSet rs = queries.getAllOrders();
                 io.write(Helpers.rsToString(rs, false) + "\n press any key to exit to menu");
-                return 1;
             }
             case "3" -> {
                 io.write("Logging off...");
-                io.flush();
-                return 3;
+                return false;
             }
             case "2" -> {
                 handleLookUp(io);
-                return 2;
             }
             case "4" -> {
                 placeOrder(io);
-                return 4;
             }
             default -> {
                 io.write("Invalid command. Press any key to proceed to menu");
-                return 4;
             }
         }
+        return true;
     }
 
 
     private void handleLookUp(IOUnit io) throws IOException, SQLException {
-
         io.write("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
 
         String product = io.read();
@@ -78,16 +68,11 @@ public class Customer extends User {
             return;
         }
 
-        int stock = Integer.parseInt(rs.getString("stock"));
-        int amount = promptAmount(io, stock);
+        int amount = promptAmount(io, rs);
 
-        String productName = rs.getString("name");
-        BigDecimal price = rs.getBigDecimal("price");
-        BigDecimal totalCost = price.multiply(new BigDecimal(amount));
-        System.out.println(rs.getInt("id"));
+        if (!confirmOrder(io, rs, amount)) return;
+
         int item_id = rs.getInt("id");
-
-        if (!confirmOrder(io, productName, totalCost, amount)) return;
 
         askForCSC(io);
 
@@ -104,6 +89,7 @@ public class Customer extends User {
         while (true) {
             io.write("Provide product exact name or ean: ");
             String product = io.read();
+            if (product.equals("END")) return null;
             ResultSet rs = queries.lookUpProduct(product);
             io.write("this one?" + "\n" + Helpers.rsToString(rs, true) + "\n" + "type y for yes, n for no");
             String choice = io.read();
@@ -113,23 +99,27 @@ public class Customer extends User {
     }
 
 
-    private int promptAmount(IOUnit io, int stock) throws IOException {
+    private int promptAmount(IOUnit io, ResultSet rs) throws IOException, SQLException {
+        int stock = rs.getInt("stock");
         io.write("How many? Provide int. Available: " + stock);
         while (true) {
             try {
                 int amount = Integer.parseInt(io.read());
-                if (amount <= stock) return amount;
-                io.write("Not enough stock. Try again.");
+                if (amount <= stock && amount > 0) return amount;
+                io.write("Not enough in stock. Try again: ");
             } catch (NumberFormatException e){
                 io.write("provide integer");
             }
-
         }
     }
 
 
-    private boolean confirmOrder(IOUnit io, String name, BigDecimal totalCost, int amount) throws IOException {
-        io.write("Amount: " + amount + ". " + name + ". Total sum: " + totalCost + "€"
+    private boolean confirmOrder(IOUnit io, ResultSet rs, int amount) throws IOException, SQLException {
+        String productName = rs.getString("name");
+        BigDecimal price = rs.getBigDecimal("price");
+        BigDecimal totalCost = price.multiply(new BigDecimal(amount));
+
+        io.write("Amount: " + amount + ". " + productName + ". Total sum: " + totalCost + "€"
                 + "\n Type y for confirm, n for not confirm");
         String choice = io.read();
         return choice.equalsIgnoreCase("y");
