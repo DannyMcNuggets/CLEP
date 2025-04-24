@@ -35,6 +35,8 @@ public class Register {
         if (password == null) return false;
 
         // TODO: STEP 4: repeat password
+        String repeatPassword = promptRepeatPassword(password);
+        if (repeatPassword == null) return false;
 
         // STEP 5: Finalize registration
         int userID = insertUser(username, email);
@@ -99,6 +101,14 @@ public class Register {
         );
     }
 
+    private String promptRepeatPassword(String password) throws SQLException, IOException {
+        return promptInput("Re-enter password: ", new Validator() {
+            @Override
+            public boolean isValid(String input) throws SQLException {
+                return input.equals(password);
+            }
+        }, "Passwords do not match. Try again: ");
+    }
 
     @FunctionalInterface
     interface Validator {
