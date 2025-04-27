@@ -1,5 +1,6 @@
 package CLEP.util;
 
+import java.math.BigDecimal;
 import java.sql.*;
 
 public class Queries {
@@ -111,6 +112,11 @@ public class Queries {
     public boolean deductStock(int amount, int id) throws SQLException {
         String query = "UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?";
         return executeUpdate(query, amount, id, amount);
+    }
+
+    public boolean addProduct(String name, String description, BigDecimal price, int stock, String ean) throws SQLException {
+        String query = "INSERT INTO products (name, description, price, stock, ean) VALUES (?, ?, ?, ?, ?)";
+        return executeUpdate(query, name, description, price, stock, ean);
     }
 
 

@@ -31,6 +31,7 @@ public class Customer extends User {
             case "1" -> {
                 ResultSet rs = queries.getAllOrders();
                 io.write(Helpers.rsToString(rs, false) + "\n press any key to exit to menu");
+                io.read();
             }
             case "3" -> {
                 io.write("Logging off...");
@@ -51,39 +52,47 @@ public class Customer extends User {
 
 
     private void handleLookUp(IOUnit io) throws IOException, SQLException {
-        io.write("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
+        while (true) {
+            io.write("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
 
-        String product = io.read();
-        // TODO: verify provided length is at least 3 symbols. Add look up counters on each product mentioned
-        ResultSet rs = queries.lookUpProduct(product);
+            String product = io.read();
+            // TODO: verify provided length is at least 3 symbols. Add look up counters on each product mentioned
+            ResultSet rs = queries.lookUpProduct(product);
 
-        io.write(Helpers.rsToString(rs, false) + "\n press any key to exit to menu");
+            boolean anotherOne = Helpers.promptYes(io, Helpers.rsToString(rs, false) + "\nExit to menu?");
+            if (anotherOne) return;
+            //io.write(Helpers.rsToString(rs, false) + "\n press any key to exit to menu");
+        }
     }
 
 
     private void placeOrder(IOUnit io) throws IOException, SQLException {
-        ResultSet rs = promptProductSelection(io);
-        if (rs == null) {
-            io.write("Ok, abandoning. Press any key to exit to menu");
-            return;
+        while (true) {
+            ResultSet rs = promptProductSelection(io);
+            if (rs == null) { // TODO: seems like it is never NULL. check for being empty.
+                boolean abandon = Helpers.promptYes(io, "Ok abandoning. Would you like to exit to menu?");
+                if(abandon) return;
+                continue;
+            }
+
+            int amount = promptAmount(io, rs);
+
+            if (!confirmOrder(io, rs, amount)) {
+                //io.write("ok, abandoning. press any key to exit to menu");
+                return;
+            }
+            int item_id = rs.getInt("id");
+
+            askForCSC(io);
+
+            if (!queries.deductStock(amount, item_id)) {
+                boolean tryAgain = Helpers.promptYes(io, "Something went wrong. Exit to menu?");
+                if(tryAgain) return;
+            }
+
+            boolean anotherOne = Helpers.promptYes(io, "All good, email should be sent from here. Want to exit to menu?");
+            if (anotherOne) return;
         }
-
-        int amount = promptAmount(io, rs);
-
-        if (!confirmOrder(io, rs, amount)) {
-            io.write("ok, abandoning. press any key to exit to menu");
-            return;
-        }
-        int item_id = rs.getInt("id");
-
-        askForCSC(io);
-
-        if (!queries.deductStock(amount, item_id)){
-            io.write("error during deducting your order from database");
-            return;
-        }
-
-        io.write("and email should be sent from here. Check mailbox for confirmation. Press any key to exit to menu");
     }
 
 

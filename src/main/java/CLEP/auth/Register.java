@@ -70,7 +70,7 @@ public class Register {
 
 
     private int insertUser(String username, String email) throws SQLException {
-        queries.insertUser(username, email, "customer");
+        queries.insertUser(username, email, "employee");
         return queries.getUserID(username);
     }
 
