@@ -10,6 +10,8 @@ import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
 import CLEP.util.Queries;
 
+import javax.xml.transform.Result;
+
 public class Customer extends User {
 
     public Customer(int userID, Queries queries, Helpers helpers) {
@@ -43,6 +45,9 @@ public class Customer extends User {
             }
             case "4" -> {
                 placeOrder(io);
+            }
+            case "END" -> {
+                return false;
             }
             default -> {
                 io.write("Invalid command. Press any key to proceed to menu");
@@ -85,13 +90,16 @@ public class Customer extends User {
             return;
         }
 
-        ResultSet workerEmails = queries.executeQuery("SELECT email FROM users WHERE role = 'employee'");
-        StringJoiner stringJoiner = new StringJoiner(",");
-        while (workerEmails.next()) {
-            stringJoiner.add(workerEmails.getString("email"));
-        }
+        try (ResultSet workerEmails = queries.executeQuery("SELECT email FROM users WHERE role = 'employee'");
+             ResultSet customerEmail = queries.executeQuery("SELECT email FROM users WHERE id = ?", userID))
+        {
+            StringJoiner stringJoiner = new StringJoiner(",");
+            while (workerEmails.next()) {
+                stringJoiner.add(workerEmails.getString("email"));
+            }
 
-        Helpers.sendMail("Order placed", "Order placed: " + rs.getString("name"), "cleptest4@gmail.com", "cleptest4@gmail.com", stringJoiner.toString());
+            Helpers.sendMail("Order placed", "Order placed: " + rs.getString("name"), "cleptest4@gmail.com", customerEmail.toString(), stringJoiner.toString());
+        }
 
         io.write("and email should be sent from here. Check mailbox for confirmation. Press any key to exit to menu");
     }
