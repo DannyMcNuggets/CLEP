@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.StringJoiner;
+
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
 import CLEP.util.Queries;
@@ -82,6 +84,14 @@ public class Customer extends User {
             io.write("error during deducting your order from database");
             return;
         }
+
+        ResultSet workerEmails = queries.executeQuery("SELECT email FROM users WHERE role = 'employee'");
+        StringJoiner stringJoiner = new StringJoiner(",");
+        while (workerEmails.next()) {
+            stringJoiner.add(workerEmails.getString("email"));
+        }
+
+        Helpers.sendMail("Order placed", "Order placed: " + rs.getString("name"), "cleptest4@gmail.com", "cleptest4@gmail.com", stringJoiner.toString());
 
         io.write("and email should be sent from here. Check mailbox for confirmation. Press any key to exit to menu");
     }
