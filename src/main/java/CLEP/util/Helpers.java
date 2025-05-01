@@ -133,43 +133,6 @@ public class Helpers {
         }
     }
 
-    public static void sendMail(String subject, String content, String sender, String recipient, String ccAddresses) {
-        Properties prop = new Properties();
-        prop.put("mail.smtp.auth", true);
-        prop.put("mail.smtp.starttls.enable", "true");
-        prop.put("mail.smtp.host", "sandbox.smtp.mailtrap.io");
-        prop.put("mail.smtp.port", "587");
-        prop.put("mail.smtp.ssl.trust", "sandbox.smtp.mailtrap.io");
-
-        Session session = Session.getInstance(prop, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("", "");
-            }
-        });
-
-        try {
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(sender));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
-            message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(ccAddresses));
-            message.setSubject(subject);
-
-            MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setContent(content, "text/html; charset=utf-8");
-
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(mimeBodyPart);
-
-            message.setContent(multipart);
-
-            Transport.send(message);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
     // mb... not sure
     private static String resultSetToJson(ResultSet resultSet) {
         return null;

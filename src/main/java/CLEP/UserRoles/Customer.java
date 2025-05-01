@@ -9,12 +9,13 @@ import java.util.StringJoiner;
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
 import CLEP.util.Queries;
+import jakarta.mail.internet.AddressException;
 
 import javax.xml.transform.Result;
 
 public class Customer extends User {
 
-    public Customer(int userID, Queries queries, Helpers helpers) {
+    public Customer(int userID, Queries queries, Helpers helpers) throws SQLException, AddressException {
         super(userID, queries, helpers);
     }
 
@@ -24,8 +25,9 @@ public class Customer extends User {
                 "\n1 - VIEW_ORDERS" +
                 "\n2 - LOOK_UP" +
                 "\n3 - LOGOUT" +
-                "\n4 - PLACE ORDER\n" +
-                "Enter choice:";
+                "\n4 - PLACE ORDER" +
+                "\n5 - VIEW ORDER HISTORY" +
+                "\nEnter choice:";
     }
 
     // TODO: handle "END" at any step!
@@ -45,6 +47,9 @@ public class Customer extends User {
             }
             case "4" -> {
                 placeOrder(io);
+            }
+            case "5" -> {
+                getOrderHistory(io);
             }
             case "END" -> {
                 return false;
@@ -90,15 +95,14 @@ public class Customer extends User {
             return;
         }
 
-        try (ResultSet workerEmails = queries.executeQuery("SELECT email FROM users WHERE role = 'employee'");
-             ResultSet customerEmail = queries.executeQuery("SELECT email FROM users WHERE id = ?", userID))
+        try (ResultSet workerEmails = queries.executeQuery("SELECT email FROM users WHERE role = 'employee'"))
         {
             StringJoiner stringJoiner = new StringJoiner(",");
             while (workerEmails.next()) {
                 stringJoiner.add(workerEmails.getString("email"));
             }
 
-            Helpers.sendMail("Order placed", "Order placed: " + rs.getString("name"), "cleptest4@gmail.com", customerEmail.toString(), stringJoiner.toString());
+            mailSender.sendMail("Order placed", "Order placed: " + rs.getString("name"), stringJoiner.toString());
         }
 
         io.write("and email should be sent from here. Check mailbox for confirmation. Press any key to exit to menu");
@@ -132,5 +136,14 @@ public class Customer extends User {
 
     private void askForCSC(IOUnit io) throws IOException {
         Helpers.promptString(io, "Enter CSC number from your card as confirmation:");
+    }
+
+    private void getOrderHistory(IOUnit io) {
+        String query = "SELECT order_id, product_id, quantity FROM orders INNER JOIN order_items ON orders.id = order_items.order_id WHERE user_id = ?";
+        try (ResultSet rs = queries.executeQuery(query, userID)) {
+            io.write(Helpers.rsToString(rs, false));
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

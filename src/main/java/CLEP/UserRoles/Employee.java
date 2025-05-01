@@ -5,10 +5,11 @@ import java.sql.SQLException;
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
 import CLEP.util.Queries;
+import jakarta.mail.internet.AddressException;
 
 public class Employee extends User{
 
-    public Employee(int userID, Queries queries, Helpers helpers) {
+    public Employee(int userID, Queries queries, Helpers helpers) throws SQLException, AddressException {
         super(userID, queries, helpers);
     }
 

@@ -3,6 +3,7 @@ package CLEP.util;
 import CLEP.UserRoles.User;
 import CLEP.auth.Auth;
 import CLEP.auth.Register;
+import jakarta.mail.internet.AddressException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -71,7 +72,7 @@ public class ClientConnection implements Runnable {
         }
     }
 
-    private static User handleClient(IOUnit io,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private static User handleClient(IOUnit io,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException, AddressException {
 
         Auth auth = new Auth(io, queries, helpers);
         Register register = new Register(io, queries, helpers);

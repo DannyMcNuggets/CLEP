@@ -7,6 +7,8 @@ import CLEP.UserRoles.User;
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
 import CLEP.util.Queries;
+import jakarta.mail.internet.AddressException;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -24,7 +26,7 @@ public class Auth {
     }
 
 
-    public User login() throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+    public User login() throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException, AddressException {
         while (true) {
             int userID = promptUsername();
             if (userID == 0) return null;
@@ -61,7 +63,7 @@ public class Auth {
     }
 
 
-    private User createUserByRole(int userID) throws SQLException {
+    private User createUserByRole(int userID) throws SQLException, AddressException {
         String role = queries.getUserRole(userID);
         return switch (role) {
             case "customer" -> new Customer(userID, queries, helpers);
