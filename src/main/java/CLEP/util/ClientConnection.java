@@ -43,19 +43,20 @@ public class ClientConnection implements Runnable {
 
             IOUnit io = new IOUnit(input, output);
 
+            // TODO: rework this horror
             User user = null;
-            try {
-                user = handleClient(io, queries, helpers);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            if (user != null) {
+            while (user == null) {
                 try {
-                    user.handleSession(io);
+                    user = handleClient(io, queries, helpers);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            }
+
+            try {
+                user.handleSession(io);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
 
             //else output.writeUTF("Logging off..."); // rework this

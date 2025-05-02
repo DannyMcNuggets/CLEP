@@ -22,12 +22,13 @@ public class Employee extends User{
     boolean handleCommand(String command, IOUnit io) throws IOException, SQLException {
         switch (command) {
             case "1" -> {
-                io.write("Display all orders");
+                io.write("Display all orders. Press any key to get to menu");
+                io.read();
             }
             case "2" -> {
                 addProduct(io);
             }
-            case "LOGOUT" -> {
+            case "3" -> {
                 io.write("Logging off...");
                 return false;
             }
@@ -54,18 +55,15 @@ public class Employee extends User{
                     "EAN: " + ean + "\n" +
                     "Stock: " + stock + "\n";
             boolean confirm = Helpers.promptYes(io, confirmation);
+
             if (!confirm) continue;
 
-
             // check if added
-            boolean success = true;// queries.addProduct(productName, productDescription, price, stock, ean);
-            if (success){
-                boolean stop = Helpers.promptYes(io, "All went good, product added! Do you want to exit?");
-                if (stop) break;
-            } else {
-                boolean stop = Helpers.promptYes(io, "Something went wrong, product was not added! Do you want to exit?");
-                if (stop) break;
-            }
+            boolean success = queries.addProduct(productName, productDescription, price, stock, ean);
+            boolean stop = Helpers.promptYes(io, success ?
+                    "All went good, product added! Do you want to exit?" :
+                    "Something went wrong, product was not added! Do you want to exit?");
+            if (stop) break;
         }
 
     }

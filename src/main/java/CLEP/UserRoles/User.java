@@ -26,7 +26,6 @@ public abstract class User {
             if (!handleCommand(command, io)) {
                 break;
             }
-            //io.read();
         }
     }
 
