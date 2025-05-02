@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
 import CLEP.util.Queries;
@@ -52,6 +56,9 @@ public class Customer extends User {
 
 
     private void handleLookUp(IOUnit io) throws IOException, SQLException {
+
+        HashSet<Integer> lookedProducts = new HashSet<>();
+
         while (true) {
             io.write("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
 
@@ -59,10 +66,29 @@ public class Customer extends User {
             // TODO: verify provided length is at least 3 symbols. Add look up counters on each product mentioned
             ResultSet rs = queries.lookUpProduct(product);
 
-            boolean anotherOne = Helpers.promptYes(io, Helpers.rsToString(rs, false) + "\nExit to menu?");
-            if (anotherOne) return;
-            //io.write(Helpers.rsToString(rs, false) + "\n press any key to exit to menu");
+            StringBuilder resultString = new StringBuilder();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                BigDecimal price = rs.getBigDecimal("price");
+                String ean = rs.getString("ean");
+                int stock = rs.getInt("stock");
+
+                resultString.append(buildLine(id, name, description, price, ean, stock));
+                lookedProducts.add(id);
+            }
+
+            boolean anotherOne = Helpers.promptYes(io, resultString + "\nExit to menu?");
+            if (anotherOne) break;
         }
+
+        queries.updateViews(lookedProducts);
+    }
+
+    private String buildLine(int id, String name, String description, BigDecimal price, String ean, int stock){
+        return id + " | " + name + " | " + description + " | " + price + " | " + ean + " | " + stock;
     }
 
 
@@ -78,7 +104,6 @@ public class Customer extends User {
             int amount = promptAmount(io, rs);
 
             if (!confirmOrder(io, rs, amount)) {
-                //io.write("ok, abandoning. press any key to exit to menu");
                 return;
             }
             int item_id = rs.getInt("id");

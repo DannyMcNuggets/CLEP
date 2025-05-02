@@ -2,6 +2,7 @@ package CLEP.UserRoles;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
@@ -15,7 +16,7 @@ public class Employee extends User{
 
     @Override
     String getMenu() {
-        return "\n=== UserRoles.Admin Menu ===\n1 - VIEW_ORDERS\n2 - ADD PRODUCT\n3 - LOGOUT\nEnter choice:";
+        return "\n=== UserRoles.Admin Menu ===\n1 - VIEW_ORDERS\n2 - ADD PRODUCT\n3 - TOP_PRODUCTS\n4 - LOGOUT\nEnter choice:";
     }
 
     @Override
@@ -29,6 +30,9 @@ public class Employee extends User{
                 addProduct(io);
             }
             case "3" -> {
+                topProducts(io);
+            }
+            case "4" -> {
                 io.write("Logging off...");
                 return false;
             }
@@ -37,6 +41,27 @@ public class Employee extends User{
             }
         }
         return true;
+    }
+
+    private void topProducts(IOUnit io) throws SQLException, IOException {
+        ResultSet top = queries.viewTopProducts();
+        StringBuilder output = new StringBuilder();
+
+        while (top.next()) {
+            int code = top.getInt("code");
+            String name = top.getString("name");
+            String ean = top.getString("ean");
+            int totalOrdered = top.getInt("total_ordered");
+
+            output.append("Code: ").append(code)
+                    .append("| Name: ").append(name)
+                    .append("| EAN: ").append(ean)
+                    .append("| Total orders: ").append(totalOrdered)
+                    .append("\n");
+        }
+
+        io.write(output + "\nPress any kee to exit to menu: ");
+        io.read();
     }
 
     private void addProduct(IOUnit io) throws IOException, SQLException {

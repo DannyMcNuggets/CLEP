@@ -2,6 +2,8 @@ package CLEP.util;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public class Queries {
 
@@ -28,7 +30,6 @@ public class Queries {
         PreparedStatement pstms = connection.prepareStatement(query);
         prepareParams(pstms, params);
         return pstms.executeQuery();
-
     }
 
 
@@ -39,15 +40,33 @@ public class Queries {
     }
 
 
+    public int executeInsertAndReturnKey(String query, Object... params) throws SQLException {
+        try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            prepareParams(pstmt, params);
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                return 0;
+            }
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                } else {
+                    return 0;
+                }
+            }
+        }
+    }
+
+
     public boolean insertSaltAndHash(int id, byte [] hash, byte [] salt) throws SQLException {
         String query = "INSERT INTO user_credentials (user_id, password_hash, salt) VALUES (?, ?, ?)";
         return executeUpdate(query, id, hash, salt);
     }
 
 
-    public boolean insertUser(String name, String email, String role) throws SQLException{
+    public int insertUser(String name, String email, String role) throws SQLException{
         String query =  "INSERT INTO users (username, email, role) VALUES (?, ?, ?);";
-        return executeUpdate( query, name, email, role);
+        return executeInsertAndReturnKey(query, name, email, role);
     }
 
 
@@ -68,6 +87,30 @@ public class Queries {
         try (ResultSet rs = executeQuery(query, name)){
             return rs.next() ? rs.getInt("id") : -1;
         }
+    }
+
+
+    public boolean updateViews(HashSet<Integer> lookedNumbers) throws SQLException{
+        if (lookedNumbers.isEmpty()) return false;
+
+        StringBuilder query = new StringBuilder("""
+                INSERT INTO product_views (product_id, total_views, latest_view_date) VALUES 
+            """);
+
+        String values = lookedNumbers.stream()
+                .map(id -> "(?, 1, CURRENT_TIMESTAMP)")
+                .collect(Collectors.joining(", "));
+
+        query.append(values);
+        query.append("""
+            ON CONFLICT(product_id) DO UPDATE SET
+            total_views = total_views + 1,
+            latest_view_date = CURRENT_TIMESTAMP
+        """);
+
+        Object[] params = lookedNumbers.toArray();
+
+        return executeUpdate(query.toString(), params);
     }
 
 
@@ -120,28 +163,27 @@ public class Queries {
         return executeUpdate(query, name, description, price, stock, ean);
     }
 
-    // TODO: take this thing to separate method. Find all methods that used executeUpdate/executeQuery and replace them with this
+
     public int insertOrder(int userID) throws SQLException {
         String query = "INSERT INTO orders (user_id) VALUES (?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            prepareParams(pstmt, userID);
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows == 0) {
-                return 0;
-            }
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1);
-                } else {
-                   return 0;
-                }
-            }
-        }
+        return executeInsertAndReturnKey(query, userID);
     }
+
 
     public boolean insertOrderItem(int orderID, int itemID, int amount) throws SQLException {
         String query = "INSERT INTO order_items (order_id, product_id, quantity) VALUES (?, ?, ?);";
         return executeUpdate(query, orderID, itemID, amount);
+    }
+
+
+    public ResultSet viewTopProducts() throws SQLException {
+        String query = "SELECT products.id AS code, products.name, products.ean, SUM(order_items.quantity) " +
+                "AS total_ordered " +
+                "FROM order_items " +
+                "JOIN products ON order_items.product_id = products.id " +
+                "GROUP BY products .id, products .name, products .ean " +
+                "ORDER BY total_ordered DESC;";
+        return executeQuery(query);
     }
 
 
