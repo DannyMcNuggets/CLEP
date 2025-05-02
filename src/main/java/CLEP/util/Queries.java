@@ -119,5 +119,29 @@ public class Queries {
         return executeUpdate(query, name, description, price, stock, ean);
     }
 
+    // TODO: take this thing to separate method. Find all methods that used executeUpdate/executeQuery and replace them with this
+    public int insertOrder(int userID) throws SQLException {
+        String query = "INSERT INTO orders (user_id) VALUES (?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            prepareParams(pstmt, userID);
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                return 0;
+            }
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                } else {
+                   return 0;
+                }
+            }
+        }
+    }
+
+    public boolean insertOrderItem(int orderID, int itemID, int amount) throws SQLException {
+        String query = "INSERT INTO order_items (order_id, product_id, quantity) VALUES (?, ?, ?);";
+        return executeUpdate(query, orderID, itemID, amount);
+    }
+
 
 }

@@ -90,9 +90,22 @@ public class Customer extends User {
                 if(tryAgain) return;
             }
 
+            System.out.println("we got near insertion");
+            if (!inserted(item_id, amount, userID)){
+                System.out.println("insertion did not work");
+                boolean tryAgain = Helpers.promptYes(io, "Something went wrong. Exit to menu?");
+                if(tryAgain) return;
+            }
+
             boolean anotherOne = Helpers.promptYes(io, "All good, email should be sent from here. Want to exit to menu?");
             if (anotherOne) return;
         }
+    }
+
+
+    private boolean inserted (int itemID, int amount, int userID) throws SQLException {
+        int orderID = queries.insertOrder(userID);
+        return (orderID !=0 && queries.insertOrderItem(orderID, itemID, amount));
     }
 
 

@@ -25,7 +25,6 @@ public class Helpers {
         this.queries = queries;
     }
 
-
     public byte [] generateSalt(){
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
