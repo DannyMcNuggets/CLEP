@@ -16,6 +16,7 @@ public class Queries {
             switch (params[i]) {
                 case Integer integer -> pstmt.setInt(i + 1, integer);
                 case String s -> pstmt.setString(i + 1, s);
+                case BigDecimal bg -> pstmt.setBigDecimal(i + 1, bg);
                 case byte[] bytes -> pstmt.setBytes(i + 1, bytes);
                 default -> throw new SQLException("Unsupported parameter type: " + params[i].getClass());
             }
