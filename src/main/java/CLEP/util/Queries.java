@@ -13,7 +13,7 @@ public class Queries {
         this.connection = connection;
     }
 
-    private static void prepareParams(PreparedStatement pstmt, Object... params) throws SQLException {
+    public static void prepareParams(PreparedStatement pstmt, Object... params) throws SQLException {
         for (int i = 0; i < params.length; i++) {
             switch (params[i]) {
                 case Integer integer -> pstmt.setInt(i + 1, integer);
@@ -33,6 +33,7 @@ public class Queries {
     }
 
 
+    // TODO: log and handle sql exceptions
     public boolean executeUpdate(String query, Object... params) throws SQLException {
         PreparedStatement pstms = connection.prepareStatement(query);
         prepareParams(pstms, params);
@@ -185,6 +186,5 @@ public class Queries {
                 "ORDER BY total_ordered DESC;";
         return executeQuery(query);
     }
-
 
 }

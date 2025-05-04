@@ -115,7 +115,6 @@ public class Customer extends User {
                 if(tryAgain) return;
             }
 
-            System.out.println("we got near insertion");
             if (!inserted(item_id, amount, userID)){
                 System.out.println("insertion did not work");
                 boolean tryAgain = Helpers.promptYes(io, "Something went wrong. Exit to menu?");
