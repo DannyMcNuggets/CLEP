@@ -6,6 +6,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -132,6 +133,24 @@ public class Helpers {
             }
         }
     }
+
+    public static BigDecimal promptBigDecimalPrices(IOUnit io, String message) throws IOException {
+        io.write(message);
+        while (true){
+            try {
+                String input = io.read();
+                if(input.equalsIgnoreCase("END")) return BigDecimal.ZERO;
+                BigDecimal price = new BigDecimal(input);
+                if (price.compareTo(BigDecimal.ZERO) > 0 && price.compareTo(new BigDecimal("100000")) < 0) {
+                    return price;
+                }
+                io.write("Price cant be 0 or less, nor it can be more than '10000' (one hundred thousands)!");
+            } catch (NumberFormatException e){
+                io.write("Invalid format. Provide BigDeciaml, try again: ");
+            }
+        }
+    }
+
 
     // mb... not sure
     private static String resultSetToJson(ResultSet resultSet) {

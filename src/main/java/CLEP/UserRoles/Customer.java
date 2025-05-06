@@ -4,11 +4,17 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.StringJoiner;
+
 import java.util.StringJoiner;
 
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
 import CLEP.util.Queries;
+import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.AddressException;
 
 import javax.xml.transform.Result;
@@ -63,49 +69,92 @@ public class Customer extends User {
 
 
     private void handleLookUp(IOUnit io) throws IOException, SQLException {
-        io.write("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
 
-        String product = io.read();
-        // TODO: verify provided length is at least 3 symbols. Add look up counters on each product mentioned
-        ResultSet rs = queries.lookUpProduct(product);
+        HashSet<Integer> lookedProducts = new HashSet<>();
 
-        io.write(Helpers.rsToString(rs, false) + "\n press any key to exit to menu");
+        while (true) {
+            io.write("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
+
+            String product = io.read();
+            // TODO: verify provided length is at least 3 symbols. Add look up counters on each product mentioned
+            ResultSet rs = queries.lookUpProduct(product);
+
+            StringBuilder resultString = new StringBuilder();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                BigDecimal price = rs.getBigDecimal("price");
+                String ean = rs.getString("ean");
+                int stock = rs.getInt("stock");
+
+                resultString.append(buildLine(id, name, description, price, ean, stock));
+                resultString.append("\n");
+                lookedProducts.add(id);
+            }
+
+            boolean anotherOne = Helpers.promptYes(io, resultString + "\nExit to menu?");
+            if (anotherOne) break;
+        }
+
+        queries.updateViews(lookedProducts);
+    }
+
+    private String buildLine(int id, String name, String description, BigDecimal price, String ean, int stock){
+        return id + " | " + name + " | " + description + " | " + price + " | " + ean + " | " + stock;
     }
 
 
     private void placeOrder(IOUnit io) throws IOException, SQLException {
-        ResultSet rs = promptProductSelection(io);
-        if (rs == null) {
-            io.write("Ok, abandoning. Press any key to exit to menu");
-            return;
-        }
-
-        int amount = promptAmount(io, rs);
-
-        if (!confirmOrder(io, rs, amount)) {
-            io.write("ok, abandoning. press any key to exit to menu");
-            return;
-        }
-        int item_id = rs.getInt("id");
-
-        askForCSC(io);
-
-        if (!queries.deductStock(amount, item_id)){
-            io.write("error during deducting your order from database");
-            return;
-        }
-
-        try (ResultSet workerEmails = queries.executeQuery("SELECT email FROM users WHERE role = 'employee'"))
-        {
-            StringJoiner stringJoiner = new StringJoiner(",");
-            while (workerEmails.next()) {
-                stringJoiner.add(workerEmails.getString("email"));
+        while (true) {
+            ResultSet rs = promptProductSelection(io);
+            if (rs == null) { // TODO: seems like it is never NULL. check for being empty.
+                boolean abandon = Helpers.promptYes(io, "Ok abandoning. Would you like to exit to menu?");
+                if(abandon) return;
+                continue;
             }
 
-            mailSender.sendMail("Order placed", "Order placed: " + rs.getString("name"), stringJoiner.toString());
+            int amount = promptAmount(io, rs);
+
+            if (!confirmOrder(io, rs, amount)) {
+                return;
+            }
+            int item_id = rs.getInt("id");
+
+            askForCSC(io);
+
+            if (!queries.deductStock(amount, item_id)) {
+                boolean tryAgain = Helpers.promptYes(io, "Something went wrong. Exit to menu?");
+                if(tryAgain) return;
+            }
+
+            if (!inserted(item_id, amount, userID)){
+                System.out.println("insertion did not work");
+                boolean tryAgain = Helpers.promptYes(io, "Something went wrong. Exit to menu?");
+                if(tryAgain) return;
+            }
+
+            try (ResultSet workerEmails = queries.executeQuery("SELECT email FROM users WHERE role = 'employee'"))
+            {
+                StringJoiner stringJoiner = new StringJoiner(",");
+                while (workerEmails.next()) {
+                    stringJoiner.add(workerEmails.getString("email"));
+                }
+
+                mailSender.sendMail("Order placed", "Order placed: " + rs.getString("name"), stringJoiner.toString());
+            }
+
+            boolean anotherOne = Helpers.promptYes(io, "All good, email should be sent from here. Want to exit to menu?");
+            if (anotherOne) return;
         }
 
-        io.write("and email should be sent from here. Check mailbox for confirmation. Press any key to exit to menu");
+    }
+
+
+    private boolean inserted (int itemID, int amount, int userID) throws SQLException {
+        int orderID = queries.insertOrder(userID);
+        return (orderID !=0 && queries.insertOrderItem(orderID, itemID, amount));
     }
 
 

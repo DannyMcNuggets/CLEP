@@ -39,7 +39,7 @@ public class Register {
         if (repeatPassword == null) return false;
 
         // STEP 5: Finalize registration
-        int userID = insertUser(username, email);
+        int userID = queries.insertUser(username, email, "customer");
         if (userID == -1){
             io.write("Failed to register");
             return false;
@@ -66,12 +66,6 @@ public class Register {
             return false;
         }
         return true;
-    }
-
-
-    private int insertUser(String username, String email) throws SQLException {
-        queries.insertUser(username, email, "customer");
-        return queries.getUserID(username);
     }
 
 
