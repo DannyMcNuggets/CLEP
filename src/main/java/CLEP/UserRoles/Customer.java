@@ -77,6 +77,7 @@ public class Customer extends User {
                 int stock = rs.getInt("stock");
 
                 resultString.append(buildLine(id, name, description, price, ean, stock));
+                resultString.append("\n");
                 lookedProducts.add(id);
             }
 
