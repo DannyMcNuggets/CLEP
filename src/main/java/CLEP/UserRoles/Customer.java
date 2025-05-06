@@ -4,20 +4,13 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.StringJoiner;
-
 import java.util.StringJoiner;
 
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
 import CLEP.util.Queries;
 import jakarta.mail.internet.AddressException;
-import jakarta.mail.internet.AddressException;
-
-import javax.xml.transform.Result;
 
 public class Customer extends User {
 
@@ -32,7 +25,7 @@ public class Customer extends User {
                 "\n2 - LOOK_UP" +
                 "\n3 - LOGOUT" +
                 "\n4 - PLACE ORDER" +
-                "\n5 - VIEW ORDER HISTORY" +
+                "\n5 - VIEW MY ORDERS" +
                 "\nEnter choice:";
     }
 
@@ -43,6 +36,7 @@ public class Customer extends User {
             case "1" -> {
                 ResultSet rs = queries.getAllOrders();
                 io.write(Helpers.rsToString(rs, false) + "\n press any key to exit to menu");
+                io.read();
             }
             case "3" -> {
                 io.write("Logging off...");
@@ -101,6 +95,7 @@ public class Customer extends User {
         queries.updateViews(lookedProducts);
     }
 
+
     private String buildLine(int id, String name, String description, BigDecimal price, String ean, int stock){
         return id + " | " + name + " | " + description + " | " + price + " | " + ean + " | " + stock;
     }
@@ -111,7 +106,7 @@ public class Customer extends User {
             ResultSet rs = promptProductSelection(io);
             if (rs == null) { // TODO: seems like it is never NULL. check for being empty.
                 boolean abandon = Helpers.promptYes(io, "Ok abandoning. Would you like to exit to menu?");
-                if(abandon) return;
+                if (abandon) return;
                 continue;
             }
 
@@ -126,17 +121,16 @@ public class Customer extends User {
 
             if (!queries.deductStock(amount, item_id)) {
                 boolean tryAgain = Helpers.promptYes(io, "Something went wrong. Exit to menu?");
-                if(tryAgain) return;
+                if (tryAgain) return;
             }
 
-            if (!inserted(item_id, amount, userID)){
+            if (!inserted(item_id, amount, userID)) {
                 System.out.println("insertion did not work");
                 boolean tryAgain = Helpers.promptYes(io, "Something went wrong. Exit to menu?");
-                if(tryAgain) return;
+                if (tryAgain) return;
             }
 
-            try (ResultSet workerEmails = queries.executeQuery("SELECT email FROM users WHERE role = 'employee'"))
-            {
+            try (ResultSet workerEmails = queries.executeQuery("SELECT email FROM users WHERE role = 'employee'")) {
                 StringJoiner stringJoiner = new StringJoiner(",");
                 while (workerEmails.next()) {
                     stringJoiner.add(workerEmails.getString("email"));
@@ -182,15 +176,18 @@ public class Customer extends User {
         return Helpers.promptYes(io, "Amount: " + amount + ". " + name + ". Total: " + totalCost + "€ ");
     }
 
-
+    // TODO: VERIFICATION!
     private void askForCSC(IOUnit io) throws IOException {
         Helpers.promptString(io, "Enter CSC number from your card as confirmation:");
     }
 
+
     private void getOrderHistory(IOUnit io) {
         String query = "SELECT order_id, product_id, quantity FROM orders INNER JOIN order_items ON orders.id = order_items.order_id WHERE user_id = ?";
         try (ResultSet rs = queries.executeQuery(query, userID)) {
-            io.write(Helpers.rsToString(rs, false));
+            String list = Helpers.rsToString(rs, false);
+            io.write(list + "\n" + "Press any key to exit to menu: ");
+            io.read(); // TODO: REMAKE TO PROMPT YES
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
         }
