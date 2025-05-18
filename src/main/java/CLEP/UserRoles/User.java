@@ -21,7 +21,7 @@ public abstract class User {
         this.userID = userID;
         this.queries = queries;
         this.helpers = helpers;
-        mailSender = new MailSender("", "", new InternetAddress("cleptest4@gmail.com"), userID, queries);
+        mailSender = new MailSender("cleptest4@gmail.com", "", new InternetAddress("cleptest4@gmail.com"), userID, queries);
     }
 
     public void handleSession(IOUnit io) throws IOException, SQLException {

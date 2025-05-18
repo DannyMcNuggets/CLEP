@@ -104,7 +104,7 @@ public class Customer extends User {
     private void placeOrder(IOUnit io) throws IOException, SQLException {
         while (true) {
             ResultSet rs = promptProductSelection(io);
-            if (rs == null) { // TODO: seems like it is never NULL. check for being empty.
+            if (!rs.isBeforeFirst()) { // TODO: seems like it is never NULL. check for being empty.
                 boolean abandon = Helpers.promptYes(io, "Ok abandoning. Would you like to exit to menu?");
                 if (abandon) return;
                 continue;

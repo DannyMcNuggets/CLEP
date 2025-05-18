@@ -7,14 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
-// TODO: Needs testing with proper email
-
 public class MailSender {
     private final InternetAddress recipientEmail;
     private final InternetAddress senderAddress;
     private final Session session;
 
-    public MailSender(String senderUsername, String senderPassword, InternetAddress senderAddress, int userID, Queries queries) throws SQLException {
+    public MailSender(String senderUsername, String senderPassword, InternetAddress senderAddress, int userID, Queries queries) throws SQLException, AddressException {
         this.senderAddress = senderAddress;
 
         try (ResultSet customerEmail = queries.executeQuery("SELECT email FROM users WHERE id = ?", userID)) {
@@ -24,11 +22,11 @@ public class MailSender {
         }
 
         Properties prop = new Properties();
-        prop.put("mail.smtp.auth", true);
-        prop.put("mail.smtp.starttls.enable", "true");
-        prop.put("mail.smtp.host", "sandbox.smtp.mailtrap.io");
-        prop.put("mail.smtp.port", "587");
-        prop.put("mail.smtp.ssl.trust", "sandbox.smtp.mailtrap.io");
+        prop.put("mail.smtp.host", "smtp.gmail.com");
+        prop.put("mail.smtp.port", "465");
+        prop.put("mail.smtp.auth", "true");
+        prop.put("mail.smtp.socketFactory.port", "465");
+        prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 
         session = Session.getInstance(prop, new Authenticator() {
             @Override
