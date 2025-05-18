@@ -31,34 +31,20 @@ public class ClientConnection implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void run() throws RuntimeException {
         try (socket) {
-            DataInputStream input = null;
-            DataOutputStream output = null;
-            try {
-                input = new DataInputStream(socket.getInputStream());
-                output = new DataOutputStream(socket.getOutputStream());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            DataInputStream input = new DataInputStream(socket.getInputStream());
+            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
             IOUnit io = new IOUnit(input, output);
 
             // TODO: rework this horror
             User user = null;
             while (user == null) {
-                try {
-                    user = handleClient(io, queries, helpers);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                user = handleClient(io, queries, helpers);
             }
 
-            try {
-                user.handleSession(io);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            user.handleSession(io);
 
             //else output.writeUTF("Logging off..."); // rework this
         } catch (Exception e) {
