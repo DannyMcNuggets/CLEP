@@ -16,19 +16,21 @@ public abstract class User {
     protected Queries queries;
     protected Helpers helpers;
     protected MailSender mailSender;
+    protected IOUnit io;
 
-    public User(int userID, Queries queries, Helpers helpers) throws AddressException, SQLException {
+    public User(int userID, Queries queries, Helpers helpers, IOUnit io) throws AddressException, SQLException {
         this.userID = userID;
         this.queries = queries;
         this.helpers = helpers;
+        this.io = io;
         mailSender = new MailSender("cleptest4@gmail.com", "", new InternetAddress("cleptest4@gmail.com"), userID, queries);
     }
 
-    public void handleSession(IOUnit io) throws IOException, SQLException {
+    public void handleSession() throws IOException, SQLException {
         while (true) {
             io.write(getMenu());
             String command = io.read();
-            if (!handleCommand(command, io)) {
+            if (!handleCommand(command)) {
                 break;
             }
         }
@@ -36,5 +38,5 @@ public abstract class User {
 
     abstract String getMenu();
 
-    abstract boolean handleCommand(String command, IOUnit io) throws IOException, SQLException;
+    abstract boolean handleCommand(String command) throws IOException, SQLException;
 }

@@ -66,9 +66,9 @@ public class Auth {
     private User createUserByRole(int userID) throws SQLException, AddressException {
         String role = queries.getUserRole(userID);
         return switch (role) {
-            case "customer" -> new Customer(userID, queries, helpers);
-            case "admin" -> new Admin(userID, queries, helpers);
-            case "employee" -> new Employee(userID, queries, helpers);
+            case "customer" -> new Customer(userID, queries, helpers, io);
+            case "admin" -> new Admin(userID, queries, helpers, io);
+            case "employee" -> new Employee(userID, queries, helpers, io);
             default -> null;
         };
     }

@@ -10,8 +10,8 @@ import jakarta.mail.internet.AddressException;
 public class Admin extends User{
 
 
-    public Admin(int userID, Queries queries, Helpers helpers) throws SQLException, AddressException {
-        super(userID, queries, helpers);
+    public Admin(int userID, Queries queries, Helpers helpers, IOUnit io) throws SQLException, AddressException {
+        super(userID, queries, helpers, io);
     }
 
 
@@ -22,7 +22,7 @@ public class Admin extends User{
 
 
     @Override
-    boolean handleCommand(String command, IOUnit io) throws IOException {
+    boolean handleCommand(String command) throws IOException {
         switch (command){
             case "VIEW_ORDERS" -> {
                 io.write("Display all orders");

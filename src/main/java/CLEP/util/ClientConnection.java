@@ -19,9 +19,9 @@ public class ClientConnection implements Runnable {
 
     public ClientConnection(Socket socket, Connection dbConnection) throws IOException {
         this.dbConnection = dbConnection;
-        io = new IOUnit(socket);
-        queries = new Queries(dbConnection);
-        helpers = new Helpers(queries, io);
+        this.io = new IOUnit(socket);
+        this.queries = new Queries(dbConnection);
+        this.helpers = new Helpers(queries, io);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ClientConnection implements Runnable {
 
         while (true) { //TODO: rework this horror
             try (io) {
-                user.handleSession(io);
+                user.handleSession();
                 tries = 5; // reset if was successful
                 break;
             } catch (SQLException e){
@@ -82,28 +82,16 @@ public class ClientConnection implements Runnable {
 
 
     private User handleClient() throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException, AddressException {
-
-        // TODO: move to constructor
-        Auth auth = new Auth(io, queries, helpers);
-        Register register = new Register(io, queries, helpers);
-
-        switch (helpers.promptInt("Welcome to CLEP!\n1 - Login\n2 - Register", 3)
-            ){
-            case 1 -> {
-                return auth.login();
-            }
-            case 2 -> {
-                if (register.register()) {
-                    return auth.login();
-                } else {
-                    return null;
-                }
-            }
-            default -> {
-                return null;
-            }
-        }
+        int choice = helpers.promptInt("Welcome to CLEP!\n1 - Login\n2 - Register", 3);
+        return switch (choice) {
+            case 1 -> new Auth(io, queries, helpers).login();
+            case 2 -> new Register(io, queries, helpers).register()
+                    ? new Auth(io, queries, helpers).login()
+                    : null;
+            default -> null;
+        };
     }
+
 
     /*
     private static int getUserChoice(IOUnit io) throws IOException {

@@ -14,8 +14,8 @@ import jakarta.mail.internet.AddressException;
 
 public class Customer extends User {
 
-    public Customer(int userID, Queries queries, Helpers helpers) throws SQLException, AddressException {
-        super(userID, queries, helpers);
+    public Customer(int userID, Queries queries, Helpers helpers, IOUnit io) throws SQLException, AddressException {
+        super(userID, queries, helpers, io);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class Customer extends User {
 
     // TODO: handle "END" at any step!
     @Override
-    boolean handleCommand(String command, IOUnit io) throws IOException, SQLException {
+    boolean handleCommand(String command) throws IOException, SQLException {
         switch (command) {
             case "1" -> {
                 ResultSet rs = queries.getAllOrders();
@@ -43,13 +43,13 @@ public class Customer extends User {
                 return false;
             }
             case "2" -> {
-                handleLookUp(io);
+                handleLookUp();
             }
             case "4" -> {
-                placeOrder(io);
+                placeOrder();
             }
             case "5" -> {
-                getOrderHistory(io);
+                getOrderHistory();
             }
             case "END" -> {
                 return false;
@@ -63,7 +63,7 @@ public class Customer extends User {
     }
 
 
-    private void handleLookUp(IOUnit io) throws IOException, SQLException {
+    private void handleLookUp() throws IOException, SQLException {
 
         HashSet<Integer> lookedProducts = new HashSet<>();
 
@@ -71,7 +71,7 @@ public class Customer extends User {
             io.write("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
 
             String product = io.read();
-            // TODO: verify provided length is at least 3 symbols. Add look up counters on each product mentioned
+            // TODO: verify provided length is at least 3 symbols
             ResultSet rs = queries.lookUpProduct(product);
 
             StringBuilder resultString = new StringBuilder();
@@ -102,23 +102,23 @@ public class Customer extends User {
     }
 
 
-    private void placeOrder(IOUnit io) throws IOException, SQLException {
+    private void placeOrder() throws IOException, SQLException {
         while (true) {
-            ResultSet rs = promptProductSelection(io);
+            ResultSet rs = promptProductSelection();
             if (!rs.isBeforeFirst()) { // TODO: seems like it is never NULL. check for being empty.
                 boolean abandon = helpers.promptYes("Ok abandoning. Would you like to exit to menu?");
                 if (abandon) return;
                 continue;
             }
 
-            int amount = promptAmount(io, rs);
+            int amount = promptAmount(rs);
 
-            if (!confirmOrder(io, rs, amount)) {
+            if (!confirmOrder(rs, amount)) {
                 return;
             }
             int item_id = rs.getInt("id");
 
-            askForCSC(io);
+            askForCSC();
 
             if (!queries.deductStock(amount, item_id)) {
                 boolean tryAgain = helpers.promptYes("Something went wrong. Exit to menu?");
@@ -153,7 +153,7 @@ public class Customer extends User {
     }
 
 
-    private ResultSet promptProductSelection(IOUnit io) throws IOException, SQLException {
+    private ResultSet promptProductSelection() throws IOException, SQLException {
         while (true) {
             String product = helpers.promptString("Provide product exact name or ean:");
             if (product == null) return null;
@@ -164,26 +164,27 @@ public class Customer extends User {
     }
 
 
-    private int promptAmount(IOUnit io, ResultSet rs) throws IOException, SQLException {
+    private int promptAmount(ResultSet rs) throws IOException, SQLException {
         int stock = rs.getInt("stock");
         return helpers.promptInt("How many? Provide int. Available: " + stock, stock);
     }
 
 
-    private boolean confirmOrder(IOUnit io, ResultSet rs, int amount) throws IOException, SQLException {
+    private boolean confirmOrder(ResultSet rs, int amount) throws IOException, SQLException {
         String name = rs.getString("name");
         BigDecimal price = rs.getBigDecimal("price");
         BigDecimal totalCost = price.multiply(BigDecimal.valueOf(amount));
         return helpers.promptYes("Amount: " + amount + ". " + name + ". Total: " + totalCost + "€ ");
     }
 
+
     // TODO: VERIFICATION!
-    private void askForCSC(IOUnit io) throws IOException {
+    private void askForCSC() throws IOException {
         helpers.promptString("Enter CSC number from your card as confirmation:");
     }
 
 
-    private void getOrderHistory(IOUnit io) {
+    private void getOrderHistory() {
         String query = "SELECT order_id, product_id, quantity FROM orders INNER JOIN order_items ON orders.id = order_items.order_id WHERE user_id = ?";
         try (ResultSet rs = queries.executeQuery(query, userID)) {
             String list = Helpers.rsToString(rs, false);

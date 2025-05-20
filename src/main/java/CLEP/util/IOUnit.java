@@ -27,9 +27,6 @@ public class IOUnit implements AutoCloseable{
 
     }
 
-    public void flush() throws IOException {
-        output.flush();
-    }
 
     @Override
     public void close() throws Exception {

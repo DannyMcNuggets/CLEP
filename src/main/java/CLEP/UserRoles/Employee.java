@@ -11,8 +11,8 @@ import jakarta.mail.internet.AddressException;
 
 public class Employee extends User{
 
-    public Employee(int userID, Queries queries, Helpers helpers) throws SQLException, AddressException {
-        super(userID, queries, helpers);
+    public Employee(int userID, Queries queries, Helpers helpers, IOUnit io) throws SQLException, AddressException {
+        super(userID, queries, helpers, io);
     }
 
     @Override
@@ -21,17 +21,17 @@ public class Employee extends User{
     }
 
     @Override
-    boolean handleCommand(String command, IOUnit io) throws IOException, SQLException {
+    boolean handleCommand(String command) throws IOException, SQLException {
         switch (command) {
             case "1" -> {
                 io.write("Display all orders. Press any key to get to menu");
                 io.read();
             }
             case "2" -> {
-                addProduct(io);
+                addProduct();
             }
             case "3" -> {
-                topProducts(io);
+                topProducts();
             }
             case "4" -> {
                 io.write("Logging off...");
@@ -44,7 +44,7 @@ public class Employee extends User{
         return true;
     }
 
-    private void topProducts(IOUnit io) throws SQLException, IOException {
+    private void topProducts() throws SQLException, IOException {
         ResultSet top = queries.viewTopProducts();
         StringBuilder output = new StringBuilder();
 
@@ -65,7 +65,7 @@ public class Employee extends User{
         io.read();
     }
 
-    private void addProduct(IOUnit io) throws IOException, SQLException {
+    private void addProduct() throws IOException, SQLException {
         while (true) {
             String productName = helpers.promptString("Provide product name: ");
             String productDescription = helpers.promptString("Provide product description: ");
