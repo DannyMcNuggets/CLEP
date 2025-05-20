@@ -34,7 +34,7 @@ public class Register {
         String password = promptPassword();
         if (password == null) return false;
 
-        // TODO: STEP 4: repeat password
+        // STEP 4: repeat password
         String repeatPassword = promptRepeatPassword(password);
         if (repeatPassword == null) return false;
 
@@ -95,6 +95,7 @@ public class Register {
         );
     }
 
+
     private String promptRepeatPassword(String password) throws SQLException, IOException {
         return promptInput("Re-enter password: ", new Validator() {
             @Override
@@ -104,6 +105,7 @@ public class Register {
         }, "Passwords do not match. Try again: ");
     }
 
+
     @FunctionalInterface
     interface Validator {
         boolean isValid(String input) throws SQLException;
@@ -111,12 +113,12 @@ public class Register {
 
 
     private String promptInput(String promptMessage, Validator validator, String errorMessage) throws IOException, SQLException {
-        String inputStr = null;
+        String inputStr;
         io.write(promptMessage);
         while (true) {
             inputStr = io.read();
             if (inputStr.equals("END")) return null;
-            if (validator.isValid(inputStr) && !inputStr.equals("0")) {
+            if (validator.isValid(inputStr)) {
                 break;
             } else {
                 io.write(errorMessage);

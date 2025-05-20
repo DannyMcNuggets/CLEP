@@ -20,9 +20,10 @@ import java.util.regex.Pattern;
 public class Helpers {
 
     private final Queries queries;
-
-    public Helpers(Queries queries){
+    private final IOUnit io;
+    public Helpers(Queries queries, IOUnit io){
         this.queries = queries;
+        this.io = io;
     }
 
 
@@ -104,21 +105,21 @@ public class Helpers {
     }
 
 
-    public static String promptString(IOUnit io, String message) throws IOException {
+    public String promptString(String message) throws IOException {
         io.write(message);
         String input = io.read();
         return input.equalsIgnoreCase("END") ? null : input;
     }
 
 
-    public static boolean promptYes(IOUnit io, String message) throws IOException {
+    public boolean promptYes(String message) throws IOException {
         io.write(message + "\n type yes or y to agree");
         String input = io.read().trim().toLowerCase();
         return input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes");
     }
 
 
-    public static int promptInt(IOUnit io, String message, int border) throws IOException {
+    public int promptInt(String message, int border) throws IOException {
         io.write(message);
         while (true){
             String input = io.read();
@@ -134,7 +135,7 @@ public class Helpers {
     }
 
 
-    public static BigDecimal promptBigDecimalPrices(IOUnit io, String message) throws IOException {
+    public BigDecimal promptBigDecimalPrices(String message) throws IOException {
         io.write(message);
         while (true){
             try {

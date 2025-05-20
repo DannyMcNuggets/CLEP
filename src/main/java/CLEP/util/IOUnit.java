@@ -11,7 +11,6 @@ public class IOUnit implements AutoCloseable{
     protected DataOutputStream output;
 
     public IOUnit(Socket socket) throws IOException {
-
         this.input = new DataInputStream(socket.getInputStream());
         this.output = new DataOutputStream(socket.getOutputStream());
     }
@@ -22,7 +21,7 @@ public class IOUnit implements AutoCloseable{
 
     public void write(String message) throws IOException {
         if (message == null || message.isBlank()) {
-            message = "0";
+            message = "";
         }
         output.writeUTF(message);
 

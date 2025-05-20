@@ -19,18 +19,18 @@ public class ClientConnection implements Runnable {
 
     public ClientConnection(Socket socket, Connection dbConnection) throws IOException {
         this.dbConnection = dbConnection;
-        queries = new Queries(dbConnection);
-        helpers = new Helpers(queries);
         io = new IOUnit(socket);
+        queries = new Queries(dbConnection);
+        helpers = new Helpers(queries, io);
     }
 
     @Override
     public void run() throws RuntimeException {
 
-        int maxTries = 5;
+        int tries = 5;
         User user;
         try {
-            user = getUser(io);
+            user = getUser();
         } catch (SQLException | AddressException | IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new RuntimeException(e);
         }
@@ -38,9 +38,10 @@ public class ClientConnection implements Runnable {
         while (true) { //TODO: rework this horror
             try (io) {
                 user.handleSession(io);
+                tries = 5; // reset if was successful
                 break;
             } catch (SQLException e){
-                if (e.getMessage().contains("database is locked") && maxTries-- > 0){
+                if (e.getMessage().contains("database is locked") && tries-- > 0){
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException ex) {
@@ -71,21 +72,22 @@ public class ClientConnection implements Runnable {
     }
 
 
-    private User getUser(IOUnit io) throws SQLException, AddressException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private User getUser() throws SQLException, AddressException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         User user;
         do {
-            user = handleClient(io, queries, helpers);
+            user = handleClient();
         } while (user == null);
         return user;
     }
 
-    private User handleClient(IOUnit io,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException, AddressException {
+
+    private User handleClient() throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException, AddressException {
 
         // TODO: move to constructor
         Auth auth = new Auth(io, queries, helpers);
         Register register = new Register(io, queries, helpers);
 
-        switch (Helpers.promptInt(io, "Welcome to CLEP!\n1 - Login\n2 - Register", 3)
+        switch (helpers.promptInt("Welcome to CLEP!\n1 - Login\n2 - Register", 3)
             ){
             case 1 -> {
                 return auth.login();

@@ -10,8 +10,6 @@ public class Client {
     public static void main(String[] args) throws Exception {
         try (Socket socket = new Socket("localhost", 8080);
              BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
-
-             // TODO: replace with IO unit
              IOUnit io = new IOUnit(socket))
         {
 
@@ -24,7 +22,6 @@ public class Client {
                 }
 
                 String userReply = userInput.readLine();
-
                 io.write(userReply);
             }
         }

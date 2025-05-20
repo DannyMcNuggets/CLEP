@@ -89,7 +89,7 @@ public class Customer extends User {
                 lookedProducts.add(id);
             }
 
-            boolean anotherOne = Helpers.promptYes(io, resultString + "\nExit to menu?");
+            boolean anotherOne = helpers.promptYes(resultString + "\nExit to menu?");
             if (anotherOne) break;
         }
 
@@ -106,7 +106,7 @@ public class Customer extends User {
         while (true) {
             ResultSet rs = promptProductSelection(io);
             if (!rs.isBeforeFirst()) { // TODO: seems like it is never NULL. check for being empty.
-                boolean abandon = Helpers.promptYes(io, "Ok abandoning. Would you like to exit to menu?");
+                boolean abandon = helpers.promptYes("Ok abandoning. Would you like to exit to menu?");
                 if (abandon) return;
                 continue;
             }
@@ -121,13 +121,13 @@ public class Customer extends User {
             askForCSC(io);
 
             if (!queries.deductStock(amount, item_id)) {
-                boolean tryAgain = Helpers.promptYes(io, "Something went wrong. Exit to menu?");
+                boolean tryAgain = helpers.promptYes("Something went wrong. Exit to menu?");
                 if (tryAgain) return;
             }
 
             if (!inserted(item_id, amount, userID)) {
                 System.out.println("insertion did not work");
-                boolean tryAgain = Helpers.promptYes(io, "Something went wrong. Exit to menu?");
+                boolean tryAgain = helpers.promptYes("Something went wrong. Exit to menu?");
                 if (tryAgain) return;
             }
 
@@ -140,7 +140,7 @@ public class Customer extends User {
                 mailSender.sendMail("Order placed", "Order placed: " + rs.getString("name"), stringJoiner.toString());
             }
 
-            boolean anotherOne = Helpers.promptYes(io, "All good, email should be sent from here. Want to exit to menu?");
+            boolean anotherOne = helpers.promptYes("All good, email should be sent from here. Want to exit to menu?");
             if (anotherOne) return;
         }
 
@@ -155,18 +155,18 @@ public class Customer extends User {
 
     private ResultSet promptProductSelection(IOUnit io) throws IOException, SQLException {
         while (true) {
-            String product = Helpers.promptString(io, "Provide product exact name or ean:");
+            String product = helpers.promptString("Provide product exact name or ean:");
             if (product == null) return null;
 
             ResultSet rs = queries.lookUpProduct(product);
-            if (Helpers.promptYes(io, "This one?\n" + Helpers.rsToString(rs, true))) return rs;
+            if (helpers.promptYes("This one?\n" + Helpers.rsToString(rs, true))) return rs;
         }
     }
 
 
     private int promptAmount(IOUnit io, ResultSet rs) throws IOException, SQLException {
         int stock = rs.getInt("stock");
-        return Helpers.promptInt(io, "How many? Provide int. Available: " + stock, stock);
+        return helpers.promptInt("How many? Provide int. Available: " + stock, stock);
     }
 
 
@@ -174,12 +174,12 @@ public class Customer extends User {
         String name = rs.getString("name");
         BigDecimal price = rs.getBigDecimal("price");
         BigDecimal totalCost = price.multiply(BigDecimal.valueOf(amount));
-        return Helpers.promptYes(io, "Amount: " + amount + ". " + name + ". Total: " + totalCost + "€ ");
+        return helpers.promptYes("Amount: " + amount + ". " + name + ". Total: " + totalCost + "€ ");
     }
 
     // TODO: VERIFICATION!
     private void askForCSC(IOUnit io) throws IOException {
-        Helpers.promptString(io, "Enter CSC number from your card as confirmation:");
+        helpers.promptString("Enter CSC number from your card as confirmation:");
     }
 
 

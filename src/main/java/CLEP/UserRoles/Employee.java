@@ -67,11 +67,11 @@ public class Employee extends User{
 
     private void addProduct(IOUnit io) throws IOException, SQLException {
         while (true) {
-            String productName = Helpers.promptString(io, "Provide product name: ");
-            String productDescription = Helpers.promptString(io, "Provide product description: ");
-            BigDecimal price = Helpers.promptBigDecimalPrices(io, "Provide the price: "); // mb if condition to check it was not "END"
-            int stock = Helpers.promptInt(io, "Provide current stock: ", 100000); // this is stupid
-            String ean = Helpers.promptString(io, "Provide product ean or code: ");
+            String productName = helpers.promptString("Provide product name: ");
+            String productDescription = helpers.promptString("Provide product description: ");
+            BigDecimal price = helpers.promptBigDecimalPrices("Provide the price: "); // mb if condition to check it was not "END"
+            int stock = helpers.promptInt("Provide current stock: ", 100000); // this is stupid
+            String ean = helpers.promptString("Provide product ean or code: ");
 
             // ask what is being added
             String confirmation = "\nYou are adding following product:\n" +
@@ -80,13 +80,13 @@ public class Employee extends User{
                     "Price: " + price + " €\n" +
                     "EAN: " + ean + "\n" +
                     "Stock: " + stock + "\n";
-            boolean confirm = Helpers.promptYes(io, confirmation);
+            boolean confirm = helpers.promptYes(confirmation);
 
             if (!confirm) continue;
 
             // check if added
             boolean success = queries.addProduct(productName, productDescription, price, stock, ean);
-            boolean stop = Helpers.promptYes(io, success ?
+            boolean stop = helpers.promptYes(success ?
                     "All went good, product added! Do you want to exit?" :
                     "Something went wrong, product was not added! Do you want to exit?");
             if (stop) break;
