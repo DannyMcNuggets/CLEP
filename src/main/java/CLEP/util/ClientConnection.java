@@ -15,8 +15,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class ClientConnection implements Runnable {
-    private static final int MAX_ATTEMPTS = 4;
-
     private final Socket socket;
     private final Connection dbConnection;
     private final Queries queries;
@@ -33,10 +31,8 @@ public class ClientConnection implements Runnable {
     @Override
     public void run() throws RuntimeException {
         try (socket) {
-            DataInputStream input = new DataInputStream(socket.getInputStream());
-            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 
-            IOUnit io = new IOUnit(input, output);
+            IOUnit io = new IOUnit(socket);
 
             // TODO: rework this horror
             User user = null;
@@ -61,12 +57,12 @@ public class ClientConnection implements Runnable {
 
     private static User handleClient(IOUnit io,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException, AddressException {
 
+        // TODO: move to constructor
         Auth auth = new Auth(io, queries, helpers);
         Register register = new Register(io, queries, helpers);
 
-        io.write("Welcome to CLEP!\n1 - Login\n2 - Register");
-
-        switch (getUserChoice(io)) {
+        switch (Helpers.promptInt(io, "Welcome to CLEP!\n1 - Login\n2 - Register", 3)
+            ){
             case 1 -> {
                 return auth.login();
             }
@@ -83,10 +79,12 @@ public class ClientConnection implements Runnable {
         }
     }
 
+    /*
     private static int getUserChoice(IOUnit io) throws IOException {
         int attempts = 0;
         while (attempts < MAX_ATTEMPTS){
             String choiceStr = io.read();
+
             try {
                 return Integer.parseInt(choiceStr.trim());
             } catch (NumberFormatException e) {
@@ -96,4 +94,5 @@ public class ClientConnection implements Runnable {
         }
         return 0;
     }
+     */
 }

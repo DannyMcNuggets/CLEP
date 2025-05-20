@@ -1,7 +1,5 @@
 package CLEP.util;
 
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
 import org.apache.commons.validator.routines.EmailValidator;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -16,7 +14,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HexFormat;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,7 +48,6 @@ public class Helpers {
 
     public static boolean emailValidate(String email){
         return EmailValidator.getInstance().isValid(email);
-        //String re = "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
     }
 
 
@@ -107,17 +103,20 @@ public class Helpers {
         return sb.toString();
     }
 
+
     public static String promptString(IOUnit io, String message) throws IOException {
         io.write(message);
         String input = io.read();
         return input.equalsIgnoreCase("END") ? null : input;
     }
 
+
     public static boolean promptYes(IOUnit io, String message) throws IOException {
         io.write(message + "\n type yes or y to agree");
-        String input = io.read();
+        String input = io.read().trim().toLowerCase();
         return input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes");
     }
+
 
     public static int promptInt(IOUnit io, String message, int border) throws IOException {
         io.write(message);
@@ -133,6 +132,7 @@ public class Helpers {
             }
         }
     }
+
 
     public static BigDecimal promptBigDecimalPrices(IOUnit io, String message) throws IOException {
         io.write(message);

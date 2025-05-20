@@ -56,6 +56,7 @@ public class Customer extends User {
             }
             default -> {
                 io.write("Invalid command. Press any key to proceed to menu");
+                io.read();
             }
         }
         return true;

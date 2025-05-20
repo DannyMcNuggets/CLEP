@@ -98,7 +98,7 @@ public class Register {
     private String promptRepeatPassword(String password) throws SQLException, IOException {
         return promptInput("Re-enter password: ", new Validator() {
             @Override
-            public boolean isValid(String input) throws SQLException {
+            public boolean isValid(String input) {
                 return input.equals(password);
             }
         }, "Passwords do not match. Try again: ");
@@ -116,7 +116,7 @@ public class Register {
         while (true) {
             inputStr = io.read();
             if (inputStr.equals("END")) return null;
-            if (validator.isValid(inputStr)) {
+            if (validator.isValid(inputStr) && !inputStr.equals("0")) {
                 break;
             } else {
                 io.write(errorMessage);
