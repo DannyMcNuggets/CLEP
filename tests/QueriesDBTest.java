@@ -1,3 +1,4 @@
+import CLEP.util.ClientConnection;
 import CLEP.util.Queries;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -7,11 +8,16 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class QueriesDBTest {
 

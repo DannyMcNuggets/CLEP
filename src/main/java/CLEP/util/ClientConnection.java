@@ -4,9 +4,6 @@ import CLEP.UserRoles.User;
 import CLEP.auth.Auth;
 import CLEP.auth.Register;
 import jakarta.mail.internet.AddressException;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
@@ -15,47 +12,74 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class ClientConnection implements Runnable {
-    private final Socket socket;
     private final Connection dbConnection;
     private final Queries queries;
     private final Helpers helpers;
+    private final IOUnit io;
 
-    public ClientConnection(Socket socket, Connection dbConnection) {
-        this.socket = socket;
+    public ClientConnection(Socket socket, Connection dbConnection) throws IOException {
         this.dbConnection = dbConnection;
-
         queries = new Queries(dbConnection);
         helpers = new Helpers(queries);
+        io = new IOUnit(socket);
     }
 
     @Override
     public void run() throws RuntimeException {
-        try (socket) {
 
-            IOUnit io = new IOUnit(socket);
-
-            // TODO: rework this horror
-            User user = null;
-            while (user == null) {
-                user = handleClient(io, queries, helpers);
-            }
-
-            user.handleSession(io);
-
-            //else output.writeUTF("Logging off..."); // rework this
-        } catch (Exception e) {
+        int maxTries = 5;
+        User user;
+        try {
+            user = getUser(io);
+        } catch (SQLException | AddressException | IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                dbConnection.close();
-            } catch (SQLException e) {
-                System.err.println("Could not close db connection properly");
-                e.printStackTrace();
+        }
+
+        while (true) { //TODO: rework this horror
+            try (io) {
+                user.handleSession(io);
+                break;
+            } catch (SQLException e){
+                if (e.getMessage().contains("database is locked") && maxTries-- > 0){
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    continue;
+                }
+                try {
+                    io.write("Could not access database. Try again later.");
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
+
+            closeConnection(dbConnection);
         }
     }
 
-    private static User handleClient(IOUnit io,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException, AddressException {
+
+    private void closeConnection(Connection dbConnection) {
+        try {
+            dbConnection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private User getUser(IOUnit io) throws SQLException, AddressException, IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        User user;
+        do {
+            user = handleClient(io, queries, helpers);
+        } while (user == null);
+        return user;
+    }
+
+    private User handleClient(IOUnit io,  Queries queries, Helpers helpers) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException, AddressException {
 
         // TODO: move to constructor
         Auth auth = new Auth(io, queries, helpers);
