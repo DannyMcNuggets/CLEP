@@ -19,7 +19,7 @@ public class Register {
         this.helpers = helpers;
     }
 
-    public boolean register()
+    public boolean register(String role)
             throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 
         // STEP 1: Ask for username
@@ -39,7 +39,7 @@ public class Register {
         if (repeatPassword == null) return false;
 
         // STEP 5: Finalize registration
-        int userID = queries.insertUser(username, email, "customer");
+        int userID = queries.insertUser(username, email, role);
         if (userID == -1){
             io.write("Failed to register");
             return false;
@@ -51,7 +51,7 @@ public class Register {
             return false;
         }
 
-        io.write("Registration successful! Press any key to proceed to login");
+        io.write("Registration successful!");
         io.read();
         return true;
     }

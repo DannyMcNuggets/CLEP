@@ -20,12 +20,11 @@ public class Customer extends User {
 
     @Override
     protected String getMenu() {
-        return "\n=== UserRoles.Customer Menu. Type in the number of command ===" +
-                "\n1 - VIEW_ORDERS" +
-                "\n2 - LOOK_UP" +
-                "\n3 - LOGOUT" +
-                "\n4 - PLACE ORDER" +
-                "\n5 - VIEW MY ORDERS" +
+        return "\n=== Customer Menu. Type in the number of command ===" +
+                "\n1 - LOOK_UP" +
+                "\n2 - PLACE ORDER" +
+                "\n3 - VIEW MY ORDERS" +
+                "\n4 - LOGOUT" +
                 "\nEnter choice:";
     }
 
@@ -34,22 +33,17 @@ public class Customer extends User {
     boolean handleCommand(String command) throws IOException, SQLException {
         switch (command) {
             case "1" -> {
-                ResultSet rs = queries.getAllOrders();
-                io.write(Helpers.rsToString(rs, false) + "\n press any key to exit to menu");
-                io.read();
-            }
-            case "3" -> {
-                io.write("Logging off...");
-                return false;
-            }
-            case "2" -> {
                 handleLookUp();
             }
-            case "4" -> {
+            case "2" -> {
                 placeOrder();
             }
-            case "5" -> {
+            case "3" -> {
                 getOrderHistory();
+            }
+            case "4" -> {
+                io.write("Logging off...");
+                return false;
             }
             default -> {
                 io.write("Invalid command. Press any key to proceed to menu");
@@ -67,8 +61,14 @@ public class Customer extends User {
         while (true) {
             io.write("Type product name or ean.         you can try looking for 'TestProduct' or EAN: 56902716");
 
-            String product = io.read();
-            // TODO: verify provided length is at least 3 symbols
+            String product;
+            while (true){
+                product = io.read();
+                if (product.equals("END")) return;
+                if (product.length() > 1) break;
+                io.write("Product name or code must be longer than 2 symbols");
+            }
+
             ResultSet rs = queries.lookUpProduct(product);
 
             StringBuilder resultString = new StringBuilder();
@@ -134,7 +134,11 @@ public class Customer extends User {
                     stringJoiner.add(workerEmails.getString("email"));
                 }
 
-                mailSender.sendMail("Order placed", "Order placed: " + rs.getString("name"), stringJoiner.toString());
+                try {
+                    mailSender.sendMail("Order placed", "Order placed: " + rs.getString("name"), stringJoiner.toString());
+                } catch (Exception e){
+                    System.out.println(e); // TODO: some proper handling and user notification
+                }
             }
 
             boolean anotherOne = helpers.promptYes("All good, email should be sent from here. Want to exit to menu?");
@@ -156,7 +160,7 @@ public class Customer extends User {
             if (product == null) return null;
 
             ResultSet rs = queries.lookUpProduct(product);
-            if (helpers.promptYes("This one?\n" + Helpers.rsToString(rs, true))) return rs;
+            if (helpers.promptYes("This one?\n" + Helpers.rsToString(rs, true))) return queries.lookUpProduct(product);
         }
     }
 
@@ -177,7 +181,7 @@ public class Customer extends User {
 
     // TODO: VERIFICATION!
     private void askForCSC() throws IOException {
-        helpers.promptString("Enter CSC number from your card as confirmation:");
+        String csc = helpers.promptString("Enter CSC number from your card as confirmation:");
     }
 
 
