@@ -113,17 +113,18 @@ public class Helpers {
 
 
     public boolean promptYes(String message) throws IOException {
-        io.write(message + "\n type yes or y to agree");
+        io.write(message + "\nType 'yes' or 'y' to agree");
         String input = io.read().trim().toLowerCase();
         return input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes");
     }
 
 
     public int promptInt(String message, int border) throws IOException {
+        int attempts = 5;
         io.write(message);
         while (true){
             String input = io.read();
-            if(input.equalsIgnoreCase("END")) return -1;
+            if(input.equalsIgnoreCase("END") || attempts-- < 0) return -1;
             try {
                 int value = Integer.parseInt(input);
                 if (value <= border) return value;

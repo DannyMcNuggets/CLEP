@@ -17,7 +17,7 @@ public class Employee extends User{
 
     @Override
     String getMenu() {
-        return "\n=== UserRoles.Employee Menu ===\n1 - MOST_VIEWED_PRODUCTS\n2 - ADD PRODUCT\n3 - TOP_PRODUCTS\n4 - LOGOUT\nEnter choice:";
+        return "\n=== Employee Menu ===\n1 - MOST_VIEWED_PRODUCTS\n2 - ADD PRODUCT\n3 - TOP_PRODUCTS\n4 - LOGOUT\nEnter choice:";
     }
 
     @Override

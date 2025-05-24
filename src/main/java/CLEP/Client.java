@@ -11,20 +11,19 @@ public class Client {
         try (Socket socket = new Socket("localhost", 8080);
              BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
              IOUnit io = new IOUnit(socket))
-        {
+            {
+                while (true) {
+                    String serverMessage = io.read();
+                    System.out.println(serverMessage);
 
-            while (true) {
-                String serverMessage = io.read();
-                System.out.println(serverMessage);
+                    if (serverMessage.equalsIgnoreCase("Logging off...") || serverMessage.equalsIgnoreCase("EXIT")) { // rework to codes
+                        break;
+                    }
 
-                if (serverMessage.equalsIgnoreCase("Logging off...") || serverMessage.equalsIgnoreCase("wrong choice, try again")) { // rework to codes
-                    break;
+                    String userReply = userInput.readLine();
+                    io.write(userReply);
                 }
-
-                String userReply = userInput.readLine();
-                io.write(userReply);
             }
-        }
     }
 
 }

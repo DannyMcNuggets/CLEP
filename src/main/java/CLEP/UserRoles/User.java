@@ -2,6 +2,8 @@ package CLEP.UserRoles;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 import CLEP.util.Helpers;
 import CLEP.util.IOUnit;
@@ -26,7 +28,7 @@ public abstract class User {
         mailSender = new MailSender("cleptest4@gmail.com", "", new InternetAddress("cleptest4@gmail.com"), userID, queries);
     }
 
-    public void handleSession() throws IOException, SQLException {
+    public void handleSession() throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
         while (true) {
             io.write(getMenu());
             String command = io.read();
@@ -38,5 +40,5 @@ public abstract class User {
 
     abstract String getMenu();
 
-    abstract boolean handleCommand(String command) throws IOException, SQLException;
+    abstract boolean handleCommand(String command) throws IOException, SQLException, NoSuchAlgorithmException, InvalidKeySpecException;
 }
