@@ -187,4 +187,13 @@ public class Queries {
         return executeQuery(query);
     }
 
+    public ResultSet viewMostViewedProducts() throws SQLException{
+        String query = "SELECT id,  name,  total_views,  latest_view_date FROM products " +
+                "LEFT JOIN product_views ON product_id = id " +
+                "ORDER BY total_views DESC,  latest_view_date DESC " +
+                "LIMIT 10;";
+
+        return executeQuery(query);
+    }
+
 }

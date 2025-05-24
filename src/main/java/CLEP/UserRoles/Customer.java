@@ -29,7 +29,7 @@ public class Customer extends User {
                 "\nEnter choice:";
     }
 
-    // TODO: handle "END" at any step!
+
     @Override
     boolean handleCommand(String command) throws IOException, SQLException {
         switch (command) {
@@ -50,9 +50,6 @@ public class Customer extends User {
             }
             case "5" -> {
                 getOrderHistory();
-            }
-            case "END" -> {
-                return false;
             }
             default -> {
                 io.write("Invalid command. Press any key to proceed to menu");

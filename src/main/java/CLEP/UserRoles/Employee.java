@@ -17,15 +17,14 @@ public class Employee extends User{
 
     @Override
     String getMenu() {
-        return "\n=== UserRoles.Employee Menu ===\n1 - VIEW_ORDERS\n2 - ADD PRODUCT\n3 - TOP_PRODUCTS\n4 - LOGOUT\nEnter choice:";
+        return "\n=== UserRoles.Employee Menu ===\n1 - MOST_VIEWED_PRODUCTS\n2 - ADD PRODUCT\n3 - TOP_PRODUCTS\n4 - LOGOUT\nEnter choice:";
     }
 
     @Override
     boolean handleCommand(String command) throws IOException, SQLException {
         switch (command) {
             case "1" -> {
-                io.write("Display all orders. Press any key to get to menu");
-                io.read();
+                mostViewed();
             }
             case "2" -> {
                 addProduct();
@@ -39,9 +38,32 @@ public class Employee extends User{
             }
             default -> {
                io.write("Wrong command, try again.");
+               io.read();
             }
         }
         return true;
+    }
+
+    private void mostViewed() throws SQLException, IOException{
+        ResultSet viewed = queries.viewMostViewedProducts();
+        StringBuilder output = new StringBuilder();
+
+        while (viewed.next()){
+            int id = viewed.getInt("id");
+            String name = viewed.getString("name");
+            int totalViews = viewed.getInt("total_views");
+            String date = viewed.getString("latest_view_date");
+
+            output.append("ID: ").append(id)
+                    .append("| Name: ").append(name)
+                    .append("| Total views: ").append(totalViews)
+                    .append("| Last viewed: ").append(date)
+                    .append("\n");
+        }
+
+        io.write(output + "\nPress any key to exit to menu: ");
+        io.read();
+
     }
 
     private void topProducts() throws SQLException, IOException {
@@ -61,7 +83,7 @@ public class Employee extends User{
                     .append("\n");
         }
 
-        io.write(output + "\nPress any kee to exit to menu: ");
+        io.write(output + "\nPress any key to exit to menu: ");
         io.read();
     }
 

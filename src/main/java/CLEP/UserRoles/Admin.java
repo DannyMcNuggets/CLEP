@@ -17,25 +17,26 @@ public class Admin extends User{
 
     @Override
     protected String getMenu() {
-        return "\n=== UserRoles.Admin Menu ===\n1 - VIEW_ORDERS\n2 - MANAGE_USERS\n3 - LOGOUT\nEnter choice:";
+        return "\n=== UserRoles.Admin Menu ===\n1 - VIEW_ORDERS\n2 - ADD_EMPLOYEE\n3 - LOGOUT\nEnter choice:";
     }
 
 
     @Override
     boolean handleCommand(String command) throws IOException {
         switch (command){
-            case "VIEW_ORDERS" -> {
+            case "1" -> {
                 io.write("Display all orders");
             }
-            case "MANAGE_USERS" -> {
-               io.write("Manage and display all users");
+            case "2" -> {
+               io.write("Add employee");
             }
-            case "LOGOUT" -> {
+            case "3" -> {
                 io.write("Logging off...");
                 return false;
             }
             default -> {
                 io.write("Wrong command, try again.");
+                io.read();
             }
         }
         return true;
